@@ -1,0 +1,199 @@
+++++++++++++++++++++++++++++++ Metric calculation on recom base ++++++
+
+//var gdata = spark.read.parquet("/OctopusLayout_v2/transactions/*")
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData_copy/*")
+//var gen_post = gdata.filter("txn_ts > '1568226600000'").filter("txn_ts < '1571077800000'")
+var gen_post =  gdata.filter("txn_ts > '1563129000000'").filter("txn_ts < '1565893800000'")
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var recom= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/octopus/data/Results/FINAL_RECOMMENDATION_CAMP_08AUG2019/FINAL_RECOMMENDATION_CAMP_08AUG2019.csv")
+var el1= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("/OctopusLayout_v2/eventL1Map.csv")
+el1 = el1.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+recom= recom.withColumn("event_l1_name",concat($"TMD_SEGMENT",lit("_"),$"TMD_PRODUCT"))
+recom = recom.join(um, um("MATCH_ACCOUNT")===recom("TMD_MATCH_ID"),"left").drop(um("MATCH_ACCOUNT"))
+var recom1 = recom.join(el1, el1("event_l1_name")===recom("event_l1_name"),"left").drop(el1("event_l1_name"))
+
+var eq_cash = recom1.filter("event_l1_name = 'EQUITY_CASH'")//85690
+var eq_margin  = recom1.filter("event_l1_name = 'EQUITY_MARGIN'")//47885
+var eq_derivatives  = recom1.filter("event_l1_name = 'EQUITY_DERIVATIVES_OptionsPLUS'")//47845
+var fd_bonds = recom1.filter("event_l1_name = 'FD_BONDS_FIXED DEPOSITS'")//20453
+var mf_sip =recom1.filter("event_l1_name = 'MF_SIP'")//23438
+
+
+
+//var eq_cash_res = gen_post.join(eq_cash, eq_cash("user_id")===gen_post("user_id"),"inner").drop(gen_post("user_id"))
+var eq_cash_res = gen_post.join(eq_cash, eq_cash("user_id")<=> gen_post("user_id") && gen_post("event_id")<=> eq_cash("event_id_l1"),"inner").drop(eq_cash("event_id_l1")).drop(eq_cash("user_id"))
+var eq_margin_res = gen_post.join(eq_margin, eq_margin("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_margin("event_id_l1"),"inner").drop(eq_margin("event_id_l1")).drop(eq_margin("user_id"))
+var eq_derivatives_res = gen_post.join(eq_derivatives, eq_derivatives("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_derivatives("event_id_l1"),"inner").drop(eq_derivatives("event_id_l1")).drop(eq_derivatives("user_id"))
+var fd_bonds_res = gen_post.join(fd_bonds, fd_bonds("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> fd_bonds("event_id_l1"),"inner").drop(fd_bonds("user_id")).drop(fd_bonds("event_id_l1"))
+var mf_sip_res = gen_post.join(mf_sip, mf_sip("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> mf_sip("event_id_l1"),"inner").drop(mf_sip("user_id")).drop(mf_sip("event_id_l1"))
+
+eq_cash_res.count
+eq_cash_res.select("user_id").distinct.count
+
+eq_cash_res.agg(sum("txn_metric")).show(false)//
+eq_cash_res.agg(avg("txn_metric")).show(false)//
+var m = eq_cash_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+
+eq_margin_res.agg(sum("txn_metric")).show(false)//
+eq_margin_res.agg(avg("txn_metric")).show(false)//
+var m = eq_margin_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_margin_res.count
+eq_margin_res.select("user_id").distinct.count
+
+eq_derivatives_res.agg(sum("txn_metric")).show(false)//
+eq_derivatives_res.agg(avg("txn_metric")).show(false)//
+var m = eq_derivatives_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_derivatives_res.count
+eq_derivatives_res.select("user_id").distinct.count
+
+fd_bonds_res.agg(sum("txn_metric")).show(false)//
+fd_bonds_res.agg(avg("txn_metric")).show(false)//
+var m = fd_bonds_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+fd_bonds_res.count
+fd_bonds_res.select("user_id").distinct.count
+
+mf_sip_res.agg(sum("txn_metric")).show(false)//
+mf_sip_res.agg(avg("txn_metric")).show(false)//
+var m = mf_sip_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+mf_sip_res.count
+mf_sip_res.select("user_id").distinct.count
+
++++++++++++++++++ Control base ++++++++
+
+//var gdata = spark.read.parquet("/OctopusLayout_v2/transactions/*")
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData_copy/*")
+//var gen_post = gdata.filter("txn_ts > '1568226600000'").filter("txn_ts < '1571077800000'")
+var gen_post =  gdata.filter("txn_ts > '1563129000000'").filter("txn_ts < '1565893800000'")
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var control= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Base_Conf.csv")
+control = control.withColumnRenamed("recommendation_id", "event_id_l1")
+
+var eq_cash = control.filter("event_l1_name = 'EQUITY_CASH'")//3715
+var eq_margin  = control.filter("event_l1_name = 'EQUITY_MARGIN'")//2115
+var eq_derivatives  = control.filter("event_l1_name = 'EQUITY_DERIVATIVES_OptionsPLUS'")//2155
+var fd_bonds = control.filter("event_l1_name = 'FD_BONDS_FIXED DEPOSITS'")//933
+var mf_sip =control.filter("event_l1_name = 'MF_SIP'")//1082
+
+var eq_cash_res = gen_post.join(eq_cash, eq_cash("user_id")<=> gen_post("user_id") && gen_post("event_id")<=> eq_cash("event_id_l1"),"inner").drop(eq_cash("event_id_l1")).drop(eq_cash("user_id"))
+var eq_margin_res = gen_post.join(eq_margin, eq_margin("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_margin("event_id_l1"),"inner").drop(eq_margin("event_id_l1")).drop(eq_margin("user_id"))
+var eq_derivatives_res = gen_post.join(eq_derivatives, eq_derivatives("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_derivatives("event_id_l1"),"inner").drop(eq_derivatives("event_id_l1")).drop(eq_derivatives("user_id"))
+var fd_bonds_res = gen_post.join(fd_bonds, fd_bonds("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> fd_bonds("event_id_l1"),"inner").drop(fd_bonds("user_id")).drop(fd_bonds("event_id_l1"))
+var mf_sip_res = gen_post.join(mf_sip, mf_sip("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> mf_sip("event_id_l1"),"inner").drop(mf_sip("user_id")).drop(mf_sip("event_id_l1"))
+
+eq_cash_res.count
+eq_cash_res.select("user_id").distinct.count
+
+eq_cash_res.agg(sum("txn_metric")).show(false)//
+eq_cash_res.agg(avg("txn_metric")).show(false)//
+var m = eq_cash_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+
+eq_margin_res.agg(sum("txn_metric")).show(false)//
+eq_margin_res.agg(avg("txn_metric")).show(false)//
+var m = eq_margin_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_margin_res.count
+eq_margin_res.select("user_id").distinct.count
+
+eq_derivatives_res.agg(sum("txn_metric")).show(false)//
+eq_derivatives_res.agg(avg("txn_metric")).show(false)//
+var m = eq_derivatives_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_derivatives_res.count
+eq_derivatives_res.select("user_id").distinct.count
+
+fd_bonds_res.agg(sum("txn_metric")).show(false)//
+fd_bonds_res.agg(avg("txn_metric")).show(false)//
+var m = fd_bonds_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+fd_bonds_res.count
+fd_bonds_res.select("user_id").distinct.count
+
+mf_sip_res.agg(sum("txn_metric")).show(false)//
+mf_sip_res.agg(avg("txn_metric")).show(false)//
+var m = mf_sip_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+mf_sip_res.count
+mf_sip_res.select("user_id").distinct.count
+
++++++++++++++++++ Open_base +++++++++++++++++
+
+//var gdata = spark.read.parquet("/OctopusLayout_v2/transactions/*")
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData_copy/*")
+//var gen_post = gdata.filter("txn_ts > '1568226600000'").filter("txn_ts < '1571077800000'")
+var gen_post =  gdata.filter("txn_ts > '1563129000000'").filter("txn_ts < '1565893800000'")
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var camp = spark.read.parquet("/campaign/inputfile_data/*")
+//=== filter Open base ====
+
+camp = camp.filter("ACTION = 'Open'")//83264
+var demog = spark.read.parquet("/icici/Raw_demog_v3/*")
+demog = demog.withColumn("MAIL_CUST_ID", trim($"MAIL_CUST_ID"))
+demog = demog.withColumn("MATCH_ACCOUNT_1", trim($"MATCH_ACCOUNT_1"))
+demog = demog.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER")
+demog = demog.withColumnRenamed("MATCH_ACCOUNT_1","MATCH_ACCOUNT")
+var r = camp.join(demog, demog("MAIL_CUST_ID")===camp("MTCH_ACC"), "inner").drop(demog("MAIL_CUST_ID")) if "left" join 1429 MATCH_ACCOUNT problem in raw_demog_v3 not in mail_cust_id as there is no nulls in mail_cust_id col.
+taking inner join
+r.count//83264 for left join //81835 for inner join "ALSO ONLY 14 DISTINCT MAILER CODE IN r"
+
+var cash = r.filter($"MAILER_CODE" === 18441 || $"MAILER_CODE" === 18502 || $"MAILER_CODE" === 18607)
+cash.count//25565
+var margin = r.filter($"MAILER_CODE" === 18443 || $"MAILER_CODE" === 18504 || $"MAILER_CODE" === 18622 )
+margin.count//17422
+var derivatives = r.filter($"MAILER_CODE" === 18440 || $"MAILER_CODE" === 18505 || $"MAILER_CODE" === 18691 )
+derivatives.count//20366
+var bonds = r.filter($"MAILER_CODE" === 18439 || $"MAILER_CODE" === 18501 || $"MAILER_CODE" === 18605)
+bonds.count//11993
+var mf = r.filter($"MAILER_CODE" === 18442 || $"MAILER_CODE" === 18531 || $"MAILER_CODE" === 18606)
+mf.count//6489
+
+cash.select("MATCH_ACCOUNT").distinct.count//11359
+margin.select("MATCH_ACCOUNT").distinct.count//7476
+derivatives.select("MATCH_ACCOUNT").distinct.count//8926
+bonds.select("MATCH_ACCOUNT").distinct.count//4670
+mf.select("MATCH_ACCOUNT").distinct.count//3419
+
+cash = cash.withColumn("event_id_l1", lit(3)).withColumn("event_l1_name", lit("EQUITY_CASH"))
+margin = margin.withColumn("event_id_l1", lit(11)).withColumn("event_l1_name", lit("EQUITY_MARGIN"))
+derivatives = derivatives.withColumn("event_id_l1", lit(55)).withColumn("event_l1_name", lit("EQUITY_DERIVATIVES_OptionsPLUS"))
+bonds = bonds.withColumn("event_id_l1", lit(34)).withColumn("event_l1_name", lit("FD_BONDS_FIXED DEPOSITS"))
+mf = mf.withColumn("event_id_l1", lit(35)).withColumn("event_l1_name", lit("MF_SIP"))
+
+var eq_cash = cash.join(um, um("MATCH_ACCOUNT")===cash("MATCH_ACCOUNT"), "left").drop(cash("MATCH_ACCOUNT"))
+var eq_margin = margin.join(um, um("MATCH_ACCOUNT")===margin("MATCH_ACCOUNT"), "left").drop(margin("MATCH_ACCOUNT"))
+var eq_derivatives = derivatives.join(um, um("MATCH_ACCOUNT")===derivatives("MATCH_ACCOUNT"), "left").drop(derivatives("MATCH_ACCOUNT"))
+var fd_bonds = bonds.join(um, um("MATCH_ACCOUNT")===bonds("MATCH_ACCOUNT"), "left").drop(bonds("MATCH_ACCOUNT"))
+var mf_sip = mf.join(um, um("MATCH_ACCOUNT")===mf("MATCH_ACCOUNT"), "left").drop(mf("MATCH_ACCOUNT"))
+
+var eq_cash_res = gen_post.join(eq_cash, eq_cash("user_id")<=> gen_post("user_id") && gen_post("event_id")<=> eq_cash("event_id_l1"),"inner").drop(eq_cash("event_id_l1")).drop(eq_cash("user_id"))
+var eq_margin_res = gen_post.join(eq_margin, eq_margin("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_margin("event_id_l1"),"inner").drop(eq_margin("event_id_l1")).drop(eq_margin("user_id"))
+var eq_derivatives_res = gen_post.join(eq_derivatives, eq_derivatives("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_derivatives("event_id_l1"),"inner").drop(eq_derivatives("event_id_l1")).drop(eq_derivatives("user_id"))
+var fd_bonds_res = gen_post.join(fd_bonds, fd_bonds("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> fd_bonds("event_id_l1"),"inner").drop(fd_bonds("user_id")).drop(fd_bonds("event_id_l1"))
+var mf_sip_res = gen_post.join(mf_sip, mf_sip("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> mf_sip("event_id_l1"),"inner").drop(mf_sip("user_id")).drop(mf_sip("event_id_l1"))
+
+eq_cash_res.count
+eq_cash_res.select("user_id").distinct.count
+
+eq_cash_res.agg(sum("txn_metric")).show(false)//
+eq_cash_res.agg(avg("txn_metric")).show(false)//
+var m = eq_cash_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+
+eq_margin_res.agg(sum("txn_metric")).show(false)//
+eq_margin_res.agg(avg("txn_metric")).show(false)//
+var m = eq_margin_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_margin_res.count
+eq_margin_res.select("user_id").distinct.count
+
+eq_derivatives_res.agg(sum("txn_metric")).show(false)//
+eq_derivatives_res.agg(avg("txn_metric")).show(false)//
+var m = eq_derivatives_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_derivatives_res.count
+eq_derivatives_res.select("user_id").distinct.count
+
+fd_bonds_res.agg(sum("txn_metric")).show(false)//
+fd_bonds_res.agg(avg("txn_metric")).show(false)//
+var m = fd_bonds_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+fd_bonds_res.count
+fd_bonds_res.select("user_id").distinct.count
+
+mf_sip_res.agg(sum("txn_metric")).show(false)//
+mf_sip_res.agg(avg("txn_metric")).show(false)//
+var m = mf_sip_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+mf_sip_res.count
+mf_sip_res.select("user_id").distinct.count
+

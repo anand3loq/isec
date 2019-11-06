@@ -1,0 +1,80 @@
+#### Code to find discripencies in recommendations ####
+var gdata = spark.read.parquet("/persist/habitualExploree/R21_17Aug19/genData/*")
+var gen_pre =  gdata.filter("txn_ts > '1541050215000'").filter("txn_ts < '1565933415000'")//test-Period 1 nov 1541050215000 to 16 Aug 1565933415000
+var trim = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Aftr_Trming.csv")
+var control= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Base_Conf.csv")
+var s = trim.except(control)
+s= s.withColumnRenamed("recommendation_id","event_id_l1")
+
+# to find all transaction that should not have happened for recom base(s) and control base (control)
+var res1 = gen_pre.join(s, s("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== s("event_id_l1"),"inner").drop(s("event_id_l1")).drop(s("user_id"))
+var res2 = gen_pre.join(control, control("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== control("event_id_l1"),"inner").drop(control("event_id_l1")).drop(control("user_id"))
+
+res1.count//10446803,
+res1.select("user_id").distinct.count //16318 uniq_user 
+
+res2.count//351262,
+res2.select("user_id").distinct.count //742 uniq_user 
+
+//test-Period 1 nov 1541050215000
+//            16 Aug 1565933415000
+
+
+
+
+
+###################### code to remove problematic user   and Running prepost stage #############
+
+//var recom= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/octopus/data/Results/FINAL_RECOMMENDATION_CAMP_08AUG2019/FINAL_RECOMMENDATION_CAMP_08AUG2019.csv") 
+//test-Period 1 nov 1541050215000
+//            16 Aug 1565933415000
+
+var gdata = spark.read.parquet("/persist/habitualExploree/R21_17Aug19/genData/*")//ProductionRun_id
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var gen_pre =  gdata.filter("txn_ts > '1541050215000'").filter("txn_ts < '1565933415000'")//test-Period 1 nov 1541050215000 16 Aug 1565933415000
+var trim = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Aftr_Trming.csv")
+var control= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Base_Conf.csv")
+var s = trim.except(control)
+s= s.withColumnRenamed("recommendation_id","event_id_l1")
+control= control.withColumnRenamed("recommendation_id","event_id_l1")
+
+var res_recom = gen_pre.join(s, s("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== s("event_id_l1"),"inner").drop(s("event_id_l1")).drop(s("user_id"))
+//10446803,16318 uniq_user 
+
+var res_control = gen_pre.join(control, control("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== control("event_id_l1"),"inner").drop(control("event_id_l1")).drop(control("user_id"))
+//351262, 742 uniq_usr
+
+# problematic_user calculation
+var recom_prob_user = res_recom.select("user_id").distinct//16318
+var control_prob_user = res_control.select("user_id").distinct//742
+
+# normal_user calculation
+var normal_recom_user = s.select("user_id").distinct.except(recom_prob_user)//208993
+var normal_control_user = control.select("user_id").distinct.except(control_prob_user)//9258
+
+# normal recommendations calculation
+var normal_recom = normal_recom_user.join(s, s("user_id")===normal_recom_user("user_id"),"inner").drop(s("user_id"))//208993
+var normal_control = normal_control_user.join(control, control("user_id")===normal_control_user("user_id"),"inner").drop(control("user_id"))//9258
+
+## Sanity Chek on production runid R21_17Aug19 ##
+var res1_recom = gen_pre.join(normal_recom, normal_recom("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== normal_recom("event_id_l1"),"inner").drop(normal_recom("event_id_l1")).drop(normal_recom("user_id"))
+var res1_control = gen_pre.join(normal_control, normal_control("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== normal_control("event_id_l1"),"inner").drop(normal_control("event_id_l1")).drop(normal_control("user_id"))
+res1_recom.count//0
+res1_control.count//0
+
+## Sanity check for Prepost run id R1P_19Oct19 ###
+var gdata_latest = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData/*")
+var gen_pre_latest =  gdata_latest.filter("txn_ts > '1541050215000'").filter("txn_ts < '1565933415000'")
+var res1_recom_latest = gen_pre_latest.join(normal_recom, normal_recom("user_id")=== gen_pre_latest("user_id") && gen_pre_latest("event_id")=== normal_recom("event_id_l1"),"inner").drop(normal_recom("event_id_l1")).drop(normal_recom("user_id"))
+var res1_control_latest = gen_pre_latest.join(normal_control, normal_control("user_id")=== gen_pre_latest("user_id") && gen_pre_latest("event_id")=== normal_control("event_id_l1"),"inner").drop(normal_control("event_id_l1")).drop(normal_control("user_id"))
+
+res1_recom_latest.count//10 can ignore them
+res1_control_latest.count//0
+
+## write all the normal users of control and recom base to prepost wala runid ####
+## now after sanity check we can dump to prepost run id R1P_19Oct19
+normal_recom.write.parquet("/persist/habitualExploree/R1P_19Oct19/habitualTopNRecomms_recombase")
+normal_control.write.parquet("/persist/habitualExploree/R1P_19Oct19/habitualTopNRecomms_controlbase")
+
+## Edit the execute function with name of the file like habitualTopNRecomms input as well agg and recowise file name while dumping ##
+Then ./prepost.sh for controlbase and for recombase 

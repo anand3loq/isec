@@ -1,0 +1,169 @@
+
+
+psql -U postgres d exp_summary -c "select * from transition_matrix"
+sudo service postgresql start
+
+spark-submit --class triloq.ingest.octopus.Controller --executor-memory 33G --driver-memory 19G --num-executors 2 --executor-cores 7 /opt/octopus/repos/OctopusIngestion/target/scala-2.11/IngestOctopus-assembly-0.1.jar IngestTransactions --format parquet --delimiter |            
+
+
+Octpus
+======
+Stage1
+-------
+spark-submit --class triloq.ingest.octopus.Controller --executor-memory 33G --driver-memory 19G --num-executors 2 --executor-cores 7 /opt/octopus/repos/OctopusIngestion/target/scala-2.11/IngestOctopus-assembly-0.1.jar IngestTransactions --format parquet
+
+
+
+Stage2
+-------
+spark-submit --class triloq.ingest.octopus.Controller --executor-memory 33G --driver-memory 19G --num-executors 2 --executor-cores 7 /opt/octopus/repos/OctopusIngestion/target/scala-2.11/IngestOctopus-assembly-0.1.jar IngestUserAttributes --format parquet
+
+
+
+var e_fno1 = e_fno_raw.withColumn("txn_ts",unix_timestamp(e_fno_raw.col("EXCHANGE_TIMESTAMP"),"dd-MMM-yyyy HH:mm:ss") * 1000 )
+
+
+
+Habitual
+========
+Stage1:::
+========
+spark-submit --class triloq.habitual.ai.Controller --master local[*] --executor-memory 33G --driver-memory 19G --num-executors 2 --executor-cores 7 /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar habitualAI --persist 1 --format parquet --runId R19_15Aug19 --stage genData
+
+
+STage2::
+========
+
+spark-submit                                                                                    \
+    --class triloq.habitual.ai.Controller                                                       \
+    --master local[*]                                                                           \
+    --executor-memory 33G                                                                       \
+    --driver-memory 19G                                                                         \
+    --num-executors 7                                                                           \
+    --executor-cores 2                                                                          \
+    --driver-class-path /opt/octopus/data/postgresql-42.2.5.jar                                 \
+    /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar                \
+    habitualAI                                                                                  \
+    --persist 1                                                                                 \
+    --format parquet                                                                            \
+    --runId R19_15Aug19                                                                          \
+    --stage modelDataPrep
+
+Stage3:::
+=======
+spark-submit                                                                                    \
+    --class triloq.habitual.ai.Controller                                                       \
+    --master local[*]                                                                           \
+    --executor-memory 33G                                                                       \
+    --driver-memory 19G                                                                         \
+    --num-executors 7                                                                           \
+    --executor-cores 2                                                                          \
+    /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar                \
+    habitualAI                                                                                  \
+    --persist 1                                                                                 \
+    --format  parquet                                                                           \
+    --runId   R2_27Jul19                                                                        \
+    --stage runModel                                                                            \
+    --modelType classifier
+
+
+Stage4
+====== 
+spark-submit                                                                                    \
+    --class triloq.habitual.ai.Controller                                                       \
+    --master local[*]                                                                           \
+    --executor-memory 33G                                                                       \
+    --driver-memory 19G                                                                         \
+    --num-executors 2                                                                           \
+    --executor-cores 7                                                                          \
+    /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar                \
+    habitualAI                                                                                  \
+    --persist 1                                                                                 \
+    --format  parquet                                                                           \
+    --runId   R2_27Jul19                                                                        \
+    --stage scoreDataPrep
+
+stage5
+======
+spark-submit                                                                                    \
+    --class triloq.habitual.ai.Controller                                                       \
+    --master local[*]                                                                           \
+    --executor-memory 33G                                                                       \
+    --driver-memory 19G                                                                         \
+    --num-executors 2                                                                           \
+    --executor-cores 7                                                                          \
+    /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar                \
+    habitualAI                                                                                  \
+    --persist 1                                                                                 \
+    --format  parquet                                                                           \
+    --runId  R2_27Jul19                                                                         \
+    --stage runScore                                                                            \
+    --modelType classifier
+
+stage6
+======
+spark-submit                                                                                    \
+    --class triloq.habitual.ai.Controller                                                       \
+    --master local[*]                                                                           \
+    --executor-memory 33G                                                                       \
+    --driver-memory 19G                                                                         \
+    --num-executors 2                                                                           \
+    --executor-cores 7                                                                          \
+    /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar                \
+    habitualAI                                                                                  \
+    --persist 1                                                                                 \
+    --format  parquet                                                                           \
+    --runId   R2_27Jul19                                                                        \
+    --stage runRecomms
+
+stage7
+======
+spark-submit                                                                                    \
+    --class triloq.habitual.ai.Controller                                                       \
+    --master local[*]                                                                           \
+    --executor-memory 33G                                                                       \
+    --driver-memory 19G                                                                         \
+    --num-executors 2                                                                           \
+    --executor-cores 7                                                                          \
+    /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar                \
+    habitualAI                                                                                  \
+    --persist 1                                                                                 \
+    --format  parquet                                                                           \
+    --runId   R18_14Aug19                                                                        \ 
+    --stage postAnalysis
+
+
+
+ interestedEvents = [1,4,5,6,7,8,9,11,17,20,24,25,27,28,29,30,32,33,34,35,38,41,42,43,45,48,50,51,52,53,54,55,57,58,59,61,62]
+
+  targetEvents = [1,4,5,6,7,8,9,11,17,20,24,25,27,28,29,30,32,33,34,35,38,41,42,43,45,48,50,51,52,53,54,55,57,58,59,61,62]
+
+  analysisEvents = [1,4,5,6,7,8,9,11,17,20,24,25,27,28,29,30,32,33,34,35,38,41,42,43,45,48,50,51,52,53,54,55,57,58,59,61,62]
+
+
+======================================================================================
+ConversionalModel
+====================
+stage1
+-------
+spark-submit --class triloq.habitual.ai.Controller --master local[*] --executor-memory 33G --driver-memory 19G --num-executors 2 --executor-cores 7 /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar habitualAI --persist 1 --format parquet --runId R16_CM_13Aug19 --stage genData
+
+stage2
+-------
+spark-submit --class triloq.habitual.ai.Controller --master local[*] --executor-memory 35G --driver-memory 10G --num-executors 2 --executor-cores 7 /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar conversionModel --persist 1 --format parquet --runId R16_CM_13Aug19 --stage buildConversionModels | tee /opt/octopus/results/cm1.log
+
+stage3
+-------
+spark-submit --class triloq.habitual.ai.Controller --master local[*] --executor-memory 35G --driver-memory 10G --num-executors 2 --executor-cores 7 /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar conversionModel --persist 1 --format parquet --runId R16_CM_13Aug19 --stage scoreConversionModels
+
+stage4
+-------
+spark-submit --class triloq.habitual.ai.Controller --master local[*] --executor-memory 35G --driver-memory 10G --num-executors 2 --executor-cores 7 /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar conversionModel --persist 1 --format parquet --runId R16_CM_13Aug19 --stage conversionModelsPostAnalysis
+
+
+
+======================================================================================
+
+
+
+

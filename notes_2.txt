@@ -1,0 +1,822 @@
++++++++++++++ NEW Data after recommendations till 14Oct ++++ 
+import org.apache.spark.sql.types._
+
+val customSchema = StructType(Array(
+     |         StructField("SEGMENT", StringType, true),
+     |  StructField("MATCH_ACCOUNT", StringType, true),
+     |         StructField("STOCK", StringType, true),
+     |         StructField("EVENT", StringType, true),
+     |         StructField("PRODUCT", StringType, true),
+     |  StructField("ACTION", StringType, true),
+     |  StructField("QUANTITY", DoubleType, true),
+     |  StructField("ORDER_TYPE", StringType, true),
+     |  StructField("ORDER_VALIDITY", StringType, true),
+     |  StructField("LIMIT_PRICE", DoubleType, true),
+     |  StructField("EXCHANGE", StringType, true),
+     |  StructField("EXCHANGE_TIMESTAMP", StringType, true)))
+
+val DemogSchema = StructType(Array(
+     |         StructField("MATCH_ACCOUNT_1", StringType, true),
+     |  StructField("BIRTH_YEAR", StringType, true),
+     |         StructField("GENDER", StringType, true),
+     |         StructField("CITY", StringType, true),
+     |         StructField("PINCODE", StringType, true),
+     |  StructField("STATE", StringType, true),
+     |  StructField("COUNTRY", StringType,true),
+     |  StructField("ACCOUNT_OPEN_DATE", StringType, true),
+     |  StructField("OCCUPATION", StringType, true),
+     |  StructField("INCOME_SLAB", StringType, true),
+     | StructField("MARTIAL_STATUS", StringType, true),
+     |  StructField("TYPE_OF_ACCOUNT", StringType, true),
+     |  StructField("PRIORITY_CUSTOMER", StringType, true),
+     |  StructField("HNI_CUSTOMER", StringType, true),
+     |  StructField("MAIL_CUST_ID", StringType, true)))
+
+var raw_equity = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/IncrementalData_20191014/Akshay_Rote_Data_Point_2_Equity_20191015.txt")//31452296
+
+var raw_fno = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/IncrementalData_20191014/Akshay_Rote_Data_Point_3_FNO_20191015.txt")//15377725
+
+var raw_curr = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/IncrementalData_20191014/Akshay_Rote_Data_Point_4_Currency_20191015.txt")//227979
+
+var raw_ipo = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/IncrementalData_20191014/Akshay_Rote_Data_Point_7_IPO_20191015.txt")//168988
+
+var raw_li = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/IncrementalData_20191014/Akshay_Rote_Data_Point_8_Life_Insurance_20191015.txt")//66
+
+var raw_gi = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/IncrementalData_20191014/Akshay_Rote_Data_Point_9_General_Insurance_20191015.txt") //97
+
+var raw_mf = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/IncrementalData_20191014/Akshay_Rote_Data_Point_5_MF_20191015.txt") //1752197
+
+var raw_nps = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/IncrementalData_20191014/Akshay_Rote_Data_Point_10_NPS_20191015.txt")//38416
+
+
+var raw_fd = spark.read.format("csv").schema(customSchema).option("delimiter","|").load("file:///opt/octopus/data/inputfiles/IncrementalData_20191014/Akshay_Rote_Data_Point_6_FD_BONDS_20191015_Revised.txt")// PSV_FILE 12899
+
+var f = raw_equity.union(raw_fno).union(raw_curr).union(raw_ipo).union(raw_li).union(raw_gi).union(raw_mf).union(raw_nps).union(raw_fd)// 49030663 
+
+f.write.parquet("/icici/incremental_14102019")
+======================Demog_Data till 14Oct=======
+import org.apache.spark.sql.types.
+val DemogSchema = StructType(Array(
+     |         StructField("MATCH_ACCOUNT_1", StringType, true),
+     |  StructField("BIRTH_YEAR", StringType, true),
+     |         StructField("GENDER", StringType, true),
+     |         StructField("CITY", StringType, true),
+     |         StructField("PINCODE", StringType, true),
+     |  StructField("STATE", StringType, true),
+     |  StructField("COUNTRY", StringType,true),
+     |  StructField("ACCOUNT_OPEN_DATE", StringType, true),
+     |  StructField("OCCUPATION", StringType, true),
+     |  StructField("INCOME_SLAB", StringType, true),
+     | StructField("MARTIAL_STATUS", StringType, true),
+     |  StructField("TYPE_OF_ACCOUNT", StringType, true),
+     |  StructField("PRIORITY_CUSTOMER", StringType, true),
+     |  StructField("HNI_CUSTOMER", StringType, true),
+     |  StructField("MAIL_CUST_ID", StringType, true)))
+
+
+var raw_demog = spark.read.format("csv").schema(DemogSchema).load("file:///opt/octopus/data/inputfiles/IncrementalData_20191014/Akshay_Rote_Data_Point_1_20191015.txt")//5443815
+
+===========================================================================================
+CAMPAIGN_DATA
+
+import org.apache.spark.sql.types._
+val CampSchema = StructType(Array(
+     |         StructField("ACTION", StringType, true),
+     |  StructField("MAILER_CODE", StringType, true),
+     |         StructField("START_DATE", StringType, true),
+     |         StructField("SUBJECT_LINE", StringType, true),
+     |         StructField("MAILER_TYPE",StringType, true),
+     |         StructField("MTCH_ACC", StringType, true),
+     |  StructField("RE_DT", StringType, true),
+     |  StructField("OS_NAME", StringType, true),
+     |  StructField("DEVICE_TYPE", StringType,true),
+     |  StructField("MANUFACTURER", StringType, true),
+     | StructField("BROWSER_NAME", StringType, true),
+     |  StructField("BROWSER_TYPE", StringType, true),
+     |  StructField("BROWSER_MANUFACTURER", StringType, true),
+     |  StructField("IP_ADDRESS", StringType, true),
+     |  StructField("BROWSER", StringType, true),
+     |  StructField("MOBILE_NAME", StringType, true),
+     |  StructField("USER_AGENT", StringType, true)))
+
+var click = spark.read.format("csv").schema(CampSchema).option("delimiter","|").load("file:///opt/octopus/data/inputfiles/Campaign_data_20191018/Akshay_Mail_Log_Click_20191018.txt")//35321
+
+var open1 = spark.read.format("csv").schema(CampSchema).option("delimiter","|").load("file:///opt/octopus/data/inputfiles/Campaign_data_20191018/Akshay_Mail_Log_Open_20191002.txt")
+open1 = open1.filter("ACTION = 'Open'")//7348221
+
+var open2 = spark.read.format("csv").schema(CampSchema).option("delimiter","|").load("file:///opt/octopus/data/inputfiles/Campaign_data_20191018/Akshay_Mail_Log_Open_20191018.txt")//583089
+
+
+var f = click.union(open1).union(open2)//7966631
+f.write.mode("overwrite").parquet("/campaign/campaign_data")
+
++++++++++++++++++++++++++++++++++++
+// Filter 3loq campaign data from historical campaign data //
+var camp_data = spark.read.parquet("/campaign/campaign_data/*")
+var df1 = camp_data.filter("MAILER_CODE = '18441'")//8692
+var df2 = camp_data.filter("MAILER_CODE = '18443'")//6124
+var df3 = camp_data.filter("MAILER_CODE = '18440'")//7197
+var df4 = camp_data.filter("MAILER_CODE = '18439'")//4657
+var df5 = camp_data.filter("MAILER_CODE = '18442'")//3218
+var df6 = camp_data.filter("MAILER_CODE = '18502'")//8329
+var df7 = camp_data.filter("MAILER_CODE = '18504'")//5930
+var df8 = camp_data.filter("MAILER_CODE = '18505'")//7186
+var df9 = camp_data.filter("MAILER_CODE = '18501'")//4057
+var df10 = camp_data.filter("MAILER_CODE = '18531'")//100
+var df11 = camp_data.filter("MAILER_CODE = '18607'")//8946
+var df12 = camp_data.filter("MAILER_CODE = '18622'")//5866
+var df13 = camp_data.filter("MAILER_CODE = '18691'")//7179
+var df14 = camp_data.filter("MAILER_CODE = '18605'")//4079
+var df15 = camp_data.filter("MAILER_CODE = '18606'")//3599
+
+var g = df1.union(df2).union(df3).union(df4).union(df5).union(df6).union(df7).union(df8).union(df9).union(df10).union(df11).union(df12).union(df13).union(df14).union(df15)//85159
+
+g.write.mode("overwrite").parquet("/campaign/inputfile_data")
+var h = spark.read.parquet("/campaign/inputfile_data")//85159// final 3loq campaign_data 
+h.filter("ACTION = 'Open'").count//83264
+h.filter("ACTION = 'Click'").count//1895
+
+// find min and max data in 3loq campaign data
+h = h.withColumn("timestamp",to_timestamp($"RE_DT","dd-MMM-yyyy HH:mm:ss"))
+h = h.withColumn("txn_timestamp",unix_timestamp($"timestamp"))
+h = h.withColumn("txn_time",$"txn_timestamp" * 1000)
+h.agg(min("txn_time")).show //1568301347000// PostAnalysis Start Date
+h.filter("txn_time = '1568301347000'").show // MIN_DATE=12Sept
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// modify 3loq campaign data schema according to codebase
+var h = spark.read.parquet("/campaign/inputfile_data")
+h= h.withColumn("MTCH_ACC", trim($"MTCH_ACC"))
+var demog = spark.read.parquet("/icici/Raw_demog_v3/*")
+demog = demog.withColumn("MAIL_CUST_ID", trim($"MAIL_CUST_ID"))
+demog = demog.withColumn("MATCH_ACCOUNT_1", trim($"MATCH_ACCOUNT_1"))
+demog = demog.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER")
+demog = demog.withColumnRenamed("MATCH_ACCOUNT_1","MATCH_ACCOUNT")
+var r = h.join(demog, demog("MAIL_CUST_ID")===h("MTCH_ACC"), "left").drop(demog("MAIL_CUST_ID"))// 1670 records corrupt as 21 nulls are in Demog file
+var res = r.filter("MAIL_CUST_ID is not null")
+
+res = res.withColumn("sent", lit(1))//83489
+var open = res.filter("ACTION = 'Open'")//81835
+var click = res.filter("ACTION = 'Click'")//1654
+open =open.withColumn("open", lit(1))
+open =open.withColumn("click", lit(0))
+open = open.drop("ACTION","MAILER_CODE","START_DATE","SUBJECT_LINE","MAILER_TYPE","MTCH_ACC","RE_DT","OS_NAME","DEVICE_TYPE","MANUFACTURER",
+"BROWSER_NAME","BROWSER_TYPE","BROWSER_MANUFACTURER","IP_ADDRESS","BROWSER","MOBILE_NAME","USER_AGENT","MAIL_CUST_ID")
+click =click.withColumn("click", lit(1))
+click =click.withColumn("open", lit(0))
+click= click.drop("ACTION","MAILER_CODE","START_DATE","SUBJECT_LINE","MAILER_TYPE","MTCH_ACC","RE_DT","OS_NAME","DEVICE_TYPE","MANUFACTURER",
+"BROWSER_NAME","BROWSER_TYPE","BROWSER_MANUFACTURER","IP_ADDRESS","BROWSER","MOBILE_NAME","USER_AGENT","MAIL_CUST_ID")
+// Rectified error Union was not happening properly
+click= click.drop("click")
+click =click.withColumn("click", lit(1))
+var oz = click.union(open)//83489
+
+//  schema is MATCH_ACCOUNT(has to pass in config also), sent, open, click
+RUN ./campaign.sh with same prepost run id
+
+
+==========================================================================================================
+OctopusLayout_v3===19oct
+//Total txn till date 718122718
+//User_map count //5444293
+==========================================================================================================
+PRODUCTION_PREPOSTANALYSIS
+
+Recommendation RUN_ID: R21_17Aug19
+TimeLine: campaignData 12 Sept- 14Oct
+Preperiod (Test-start, Test-End) 15Jly2019-15Aug19
+PostPeriod (PostAnalysis start-end Date) 12Sept- 14Oct
+
+RunId: R1P_19Oct19 prepost stage (first update gendata with this run_id)
+
+var recom1 =  spark.read.format("csv").option("header", "true").load("file:///opt/platform/Aftr_Trming.csv")// Aftretrim//2.35lac
+var con_base = spark.read.format("csv").option("header", "true").load("file:///opt/platform/Base_Conf.csv")//10k
+var df4 = recom1.except(con_base)//2.25lac
+1. df4.write.mode("overwrite").parquet("/persist/habitualExploree/R1P_19Oct19/habitualTopNRecomms")//  Actual Served Recommendation// Update habitualTopNrecommendations as prepost stage takes it as input
+2. Run Gendata Stage also to update with the same run id
+
+Run ./prepost.sh
+//get Report from dataframe of same runid with name Agg and Recowise and GroupA and GroupB dataframs which will be used in campaignReport stage
+
+==============================================================================================================
+Completing Post period txn count and metric
+var txn = spark.read.parquet("/icici/complete_txn_v3/*")
+txn = txn.withColumn("Date", (col("EXCHANGE_TIMESTAMP").cast("date")))
+txn = txn.withColumn("dat",$"EXCHANGE_TIMESTAMP".substr(0,12))
+txn = txn.withColumn("date",to_date($"dat", "dd-MMM-yyyy"))
+var post_txn = txn.filter(txn("date").gt(lit("2019-09-11")) and txn("date").lt(lit("2019-10-15")))
+post_txn.count//28834583
+post_txn = post_txn.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+post_txn.groupBy("event_l1_name").agg(count("MATCH_ACCOUNT")).show(100000, false)
+
++------------------------------------------------+--------------------+
+|event_l1_name                                   |count(MATCH_ACCOUNT)|
++------------------------------------------------+--------------------+
+|EQUITY_BTST                                     |176674              |
+|IPO_BUYBACK                                     |2506                |
+|IPO_IPO                                         |150162              |
+|EQUITY_DERIVATIVES_Option                       |3230104             |
+|CURRENCY_DERIVATIVES_FUTURES                    |84583               |
+|FD_BONDS_GOI                                    |175                 |
+|FD_BONDS_CORPORATE BONDS                        |442                 |
+|EQUITY_SPOT                                     |28014               |
+|FD_BONDS_FIXED DEPOSITS                         |4747                |
+|EQUITY_DERIVATIVES_Future                       |777697              |
+|MF_TIP                                          |1841                |
+|LIFE_INSURANCE_LIFE_INSURANCE                   |41                  |
+|IPO_IPOBONDS                                    |1009                |
+|EQUITY_DERIVATIVES_FuturePLUS Stop Loss         |795644              |
+|MF_LUMPSUM                                      |233992              |
+|EQUITY_MARGIN                                   |5467217             |
+|NPS_NPS                                         |20805               |
+|MF_STP                                          |37559               |
+|IPO_TAKEOVER                                    |63                  |
+|EQUITY_MarginPLUS                               |4558123             |
+|IPO_RIGHTSISSUE                                 |74                  |
+|EQUITY_eATM                                     |259226              |
+|GENERAL_INSURANCE_Health Insurance:Religare Care|39                  |
+|EQUITY_CASH                                     |8173978             |
+|CURRENCY_DERIVATIVES_OPTIONS                    |35835               |
+|MF_SWP                                          |3521                |
+|EQUITY_DERIVATIVES_FuturePLUS                   |226127              |
+|EQUITY_OFS                                      |5956                |
+|GENERAL_INSURANCE_Health Insurance:I-Lombard CHI|22                  |
+|EQUITY_DERIVATIVES_OptionsPLUS                  |3889830             |
+|MF_SIP                                          |668577              |
++------------------------------------------------+--------------------+
+
+|EQUITY_CASH                                     |8173978             |
+|EQUITY_DERIVATIVES_OptionsPLUS                  |3889830             |
+|MF_SIP                                          |668577              |
+|FD_BONDS_FIXED DEPOSITS                         |4747                |
+|EQUITY_MARGIN                                   |5467217             |
+post_txn.count//28834583[TOTAL TXN COUNT IN POST DF]
+///
+load genData
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData/*")
+12-Sept2019-> Epoch 1568226600
+15-Oct-2019-> Epoch 1571077800 actualy 14Oct
+
+var gen_post = gdata.filter("txn_ts > '1568226600000'").filter("txn_ts < '1571077800000'")
+gen_post.count//28887191
+gen_post.groupBy("event_id").agg(count("user_id")).show(100000, false)
++--------+--------------+
+|event_id|count(user_id)|
++--------+--------------+
+|7       |259507        |
+|51      |63            |
+|15      |1841          |
+|11      |5469808       |
+|29      |795644        |
+|3       |8222486       |
+|30      |226127        |
+|34      |4747          |
+|8       |84827         |
+|22      |40            |
+|35      |668577        |
+|16      |20810         |
+|47      |3230217       |
+|18      |234431        |
+|17      |176921        |
+|26      |5956          |
+|6       |3521          |
+|60      |2562          |
+|41      |168           |
+|55      |3889830       |
+|25      |28021         |
+|58      |74            |
+|32      |442           |
+|37      |1008          |
+|49      |22            |
+|63      |777736        |
+|4       |37559         |
+|21      |150162        |
+|14      |35920         |
+|2       |41            |
+|50      |4558123       |
++--------+--------------+
+|EQUITY              |CASH                                              |3          |8222486
+|EQUITY_DERIVATIVES  |OptionsPLUS                                       |55         |3889830
+|MF                  |SIP                                               |35         |668577
+|FD_BONDS            |FIXED DEPOSITS                                    |34         |4747
+|EQUITY              |MARGIN                                            |11         |5469808
+
+
+### Akshay
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData/*")
+var gen_post = gdata.filter("txn_ts > '1568226600000'").filter("txn_ts < '1571077800000'")
+var recom= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/octopus/data/Results/FINAL_RECOMMENDATION_CAMP_08AUG2019/FINAL_RECOMMENDATION_CAMP_08AUG2019.csv")
+var tmp = recom.join(um , um ("MATCH_ACCOUNT")===recom("TMD_MATCH_ID"),"inner").drop ("MATCH_ACCOUNT")
+var r = gen_post.join(tmp, tmp("user_id")===gen_post("user_id"),"inner").drop(tmp("user_id"))
+r.count//12267870
+val resultDf = gen_post.join(tmp, gen_post("user_id") === tmp("user_id")).drop(gen_post("user_id"))
+val resultDf1 = tmp.join(gen_post, tmp("user_id") === gen_post("user_id")).drop(gen_post("user_id"))
+
+#gdata.filter("txn_ts > '1559327400000'").filter("txn_ts < '1561919400000'")
+
+var camp = spark.read.parquet("/campaign/final_data/*")
+camp.count//83489
+var d1 = camp.join(gen_post, gen_post("MATCH_ACCOUNT")===camp("MATCH_ACCOUNT"),"inner").drop(camp("MATCH_ACCOUNT"))
+
+
+
+
+
+
+###############
+// Pre-Period 15-Jul19 -> 1563129000
+              15-Aug19 -> 1565893800  actually 16Aug 1565893800000
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData_copy/*")
+var gen_pre = gdata.filter("txn_ts > '1563129000000'").filter("txn_ts < '1565893800000'")
+var x1 = gen_pre.join(ga, gen_pre("user_id")<=> ga("user_id") && gen_pre("event_id")<=> ga("recommendation_id"),"inner").drop(ga("recommendation_id"))
+var x2 = gen_post.join(ga, gen_post("user_id")<=> ga("user_id") && gen_post("event_id")<=> ga("recommendation_id"),"inner").drop(ga("recommendation_id"))
+var ga = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/GroupA/*")
+var r1 = gdata.join(ga, gdata("user_id")<=> ga("user_id") && gdata("event_id")<=> ga("recommendation_id"),"inner").drop(ga("recommendation_id")).drop(ga("user_id"))
+var r1 = gdata.join(ga, gdata("user_id")<=> ga("user_id") && gdata("event_id")<=> ga("recommendation_id"),"inner").drop(ga("recommendation_id")).drop(ga("user_id"))
+r1.write.parquet("/groupA_transactions")
+r1.count//3757324
+
+++++++++++++++++++++++++++++++ Metric calculation on recom base ++++++
+//var gdata = spark.read.parquet("/OctopusLayout_v2/transactions/*")
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData_copy/*")
+//var gen_post = gdata.filter("txn_ts > '1568226600000'").filter("txn_ts < '1571077800000'")
+var gen_post =  gdata.filter("txn_ts > '1563129000000'").filter("txn_ts < '1565893800000'")
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var recom= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/octopus/data/Results/FINAL_RECOMMENDATION_CAMP_08AUG2019/FINAL_RECOMMENDATION_CAMP_08AUG2019.csv")
+var el1= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("/OctopusLayout_v2/eventL1Map.csv")
+el1 = el1.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+recom= recom.withColumn("event_l1_name",concat($"TMD_SEGMENT",lit("_"),$"TMD_PRODUCT"))
+recom = recom.join(um, um("MATCH_ACCOUNT")===recom("TMD_MATCH_ID"),"left").drop(um("MATCH_ACCOUNT"))
+var recom1 = recom.join(el1, el1("event_l1_name")===recom("event_l1_name"),"left").drop(el1("event_l1_name"))
+
+var eq_cash = recom1.filter("event_l1_name = 'EQUITY_CASH'")//85690
+var eq_margin  = recom1.filter("event_l1_name = 'EQUITY_MARGIN'")//47885
+var eq_derivatives  = recom1.filter("event_l1_name = 'EQUITY_DERIVATIVES_OptionsPLUS'")//47845
+var fd_bonds = recom1.filter("event_l1_name = 'FD_BONDS_FIXED DEPOSITS'")//20453
+var mf_sip =recom1.filter("event_l1_name = 'MF_SIP'")//23438
+
+
+
+//var eq_cash_res = gen_post.join(eq_cash, eq_cash("user_id")===gen_post("user_id"),"inner").drop(gen_post("user_id"))
+var eq_cash_res = gen_post.join(eq_cash, eq_cash("user_id")<=> gen_post("user_id") && gen_post("event_id")<=> eq_cash("event_id_l1"),"inner").drop(eq_cash("event_id_l1")).drop(eq_cash("user_id"))
+var eq_margin_res = gen_post.join(eq_margin, eq_margin("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_margin("event_id_l1"),"inner").drop(eq_margin("event_id_l1")).drop(eq_margin("user_id"))
+var eq_derivatives_res = gen_post.join(eq_derivatives, eq_derivatives("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_derivatives("event_id_l1"),"inner").drop(eq_derivatives("event_id_l1")).drop(eq_derivatives("user_id"))
+var fd_bonds_res = gen_post.join(fd_bonds, fd_bonds("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> fd_bonds("event_id_l1"),"inner").drop(fd_bonds("user_id")).drop(fd_bonds("event_id_l1"))
+var mf_sip_res = gen_post.join(mf_sip, mf_sip("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> mf_sip("event_id_l1"),"inner").drop(mf_sip("user_id")).drop(mf_sip("event_id_l1"))
+
+eq_cash_res.count
+eq_cash_res.select("user_id").distinct.count
+
+eq_cash_res.agg(sum("txn_metric")).show(false)//
+eq_cash_res.agg(avg("txn_metric")).show(false)//
+var m = eq_cash_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+
+eq_margin_res.agg(sum("txn_metric")).show(false)//
+eq_margin_res.agg(avg("txn_metric")).show(false)//
+var m = eq_margin_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_margin_res.count
+eq_margin_res.select("user_id").distinct.count
+
+eq_derivatives_res.agg(sum("txn_metric")).show(false)//
+eq_derivatives_res.agg(avg("txn_metric")).show(false)//
+var m = eq_derivatives_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_derivatives_res.count
+eq_derivatives_res.select("user_id").distinct.count
+
+fd_bonds_res.agg(sum("txn_metric")).show(false)//
+fd_bonds_res.agg(avg("txn_metric")).show(false)//
+var m = fd_bonds_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+fd_bonds_res.count
+fd_bonds_res.select("user_id").distinct.count
+
+mf_sip_res.agg(sum("txn_metric")).show(false)//
+mf_sip_res.agg(avg("txn_metric")).show(false)//
+var m = mf_sip_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+mf_sip_res.count
+mf_sip_res.select("user_id").distinct.count
+
++++++++++++++++++ Control base ++++++++
+
+//var gdata = spark.read.parquet("/OctopusLayout_v2/transactions/*")
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData_copy/*")
+//var gen_post = gdata.filter("txn_ts > '1568226600000'").filter("txn_ts < '1571077800000'")
+var gen_post =  gdata.filter("txn_ts > '1563129000000'").filter("txn_ts < '1565893800000'")
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var control= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Base_Conf.csv")
+control = control.withColumnRenamed("recommendation_id", "event_id_l1")
+
+var eq_cash = control.filter("event_l1_name = 'EQUITY_CASH'")//3715
+var eq_margin  = control.filter("event_l1_name = 'EQUITY_MARGIN'")//2115
+var eq_derivatives  = control.filter("event_l1_name = 'EQUITY_DERIVATIVES_OptionsPLUS'")//2155
+var fd_bonds = control.filter("event_l1_name = 'FD_BONDS_FIXED DEPOSITS'")//933
+var mf_sip =control.filter("event_l1_name = 'MF_SIP'")//1082
+
+var eq_cash_res = gen_post.join(eq_cash, eq_cash("user_id")<=> gen_post("user_id") && gen_post("event_id")<=> eq_cash("event_id_l1"),"inner").drop(eq_cash("event_id_l1")).drop(eq_cash("user_id"))
+var eq_margin_res = gen_post.join(eq_margin, eq_margin("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_margin("event_id_l1"),"inner").drop(eq_margin("event_id_l1")).drop(eq_margin("user_id"))
+var eq_derivatives_res = gen_post.join(eq_derivatives, eq_derivatives("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_derivatives("event_id_l1"),"inner").drop(eq_derivatives("event_id_l1")).drop(eq_derivatives("user_id"))
+var fd_bonds_res = gen_post.join(fd_bonds, fd_bonds("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> fd_bonds("event_id_l1"),"inner").drop(fd_bonds("user_id")).drop(fd_bonds("event_id_l1"))
+var mf_sip_res = gen_post.join(mf_sip, mf_sip("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> mf_sip("event_id_l1"),"inner").drop(mf_sip("user_id")).drop(mf_sip("event_id_l1"))
+
+eq_cash_res.count
+eq_cash_res.select("user_id").distinct.count
+
+eq_cash_res.agg(sum("txn_metric")).show(false)//
+eq_cash_res.agg(avg("txn_metric")).show(false)//
+var m = eq_cash_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+
+eq_margin_res.agg(sum("txn_metric")).show(false)//
+eq_margin_res.agg(avg("txn_metric")).show(false)//
+var m = eq_margin_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_margin_res.count
+eq_margin_res.select("user_id").distinct.count
+
+eq_derivatives_res.agg(sum("txn_metric")).show(false)//
+eq_derivatives_res.agg(avg("txn_metric")).show(false)//
+var m = eq_derivatives_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_derivatives_res.count
+eq_derivatives_res.select("user_id").distinct.count
+
+fd_bonds_res.agg(sum("txn_metric")).show(false)//
+fd_bonds_res.agg(avg("txn_metric")).show(false)//
+var m = fd_bonds_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+fd_bonds_res.count
+fd_bonds_res.select("user_id").distinct.count
+
+mf_sip_res.agg(sum("txn_metric")).show(false)//
+mf_sip_res.agg(avg("txn_metric")).show(false)//
+var m = mf_sip_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+mf_sip_res.count
+mf_sip_res.select("user_id").distinct.count
+
++++++++++++++++++ Open_base +++++++++++++++++
+
+//var gdata = spark.read.parquet("/OctopusLayout_v2/transactions/*")
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData_copy/*")
+//var gen_post = gdata.filter("txn_ts > '1568226600000'").filter("txn_ts < '1571077800000'")
+var gen_post =  gdata.filter("txn_ts > '1563129000000'").filter("txn_ts < '1565893800000'")//pre-period
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var camp = spark.read.parquet("/campaign/inputfile_data/*")
+//=== filter Open base ====
+
+camp = camp.filter("ACTION = 'Open'")//83264
+var demog = spark.read.parquet("/icici/Raw_demog_v3/*")
+demog = demog.withColumn("MAIL_CUST_ID", trim($"MAIL_CUST_ID"))
+demog = demog.withColumn("MATCH_ACCOUNT_1", trim($"MATCH_ACCOUNT_1"))
+demog = demog.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER")
+demog = demog.withColumnRenamed("MATCH_ACCOUNT_1","MATCH_ACCOUNT")
+var r = camp.join(demog, demog("MAIL_CUST_ID")===camp("MTCH_ACC"), "inner").drop(demog("MAIL_CUST_ID")) if "left" join 1429 MATCH_ACCOUNT problem in raw_demog_v3 not in mail_cust_id as there is no nulls in mail_cust_id col.
+taking inner join
+r.count//83264 for left join //81835 for inner join "ALSO ONLY 14 DISTINCT MAILER CODE IN r
+
+var cash = r.filter($"MAILER_CODE" === 18441 || $"MAILER_CODE" === 18502 || $"MAILER_CODE" === 18607)
+cash.count//25565
+var margin = r.filter($"MAILER_CODE" === 18443 || $"MAILER_CODE" === 18504 || $"MAILER_CODE" === 18622 )
+margin.count//17422
+var derivatives = r.filter($"MAILER_CODE" === 18440 || $"MAILER_CODE" === 18505 || $"MAILER_CODE" === 18691 )
+derivatives.count//20366
+var bonds = r.filter($"MAILER_CODE" === 18439 || $"MAILER_CODE" === 18501 || $"MAILER_CODE" === 18605)
+bonds.count//11993
+var mf = r.filter($"MAILER_CODE" === 18442 || $"MAILER_CODE" === 18531 || $"MAILER_CODE" === 18606)
+mf.count//6489
+
+cash.select("MATCH_ACCOUNT").distinct.count//11359
+margin.select("MATCH_ACCOUNT").distinct.count//7476
+derivatives.select("MATCH_ACCOUNT").distinct.count//8926
+bonds.select("MATCH_ACCOUNT").distinct.count//4670
+mf.select("MATCH_ACCOUNT").distinct.count//3419
+
+cash = cash.withColumn("event_id_l1", lit(3)).withColumn("event_l1_name", lit("EQUITY_CASH"))
+margin = margin.withColumn("event_id_l1", lit(11)).withColumn("event_l1_name", lit("EQUITY_MARGIN"))
+derivatives = derivatives.withColumn("event_id_l1", lit(55)).withColumn("event_l1_name", lit("EQUITY_DERIVATIVES_OptionsPLUS"))
+bonds = bonds.withColumn("event_id_l1", lit(34)).withColumn("event_l1_name", lit("FD_BONDS_FIXED DEPOSITS"))
+mf = mf.withColumn("event_id_l1", lit(35)).withColumn("event_l1_name", lit("MF_SIP"))
+
+var eq_cash = cash.join(um, um("MATCH_ACCOUNT")===cash("MATCH_ACCOUNT"), "left").drop(cash("MATCH_ACCOUNT"))
+var eq_margin = margin.join(um, um("MATCH_ACCOUNT")===margin("MATCH_ACCOUNT"), "left").drop(margin("MATCH_ACCOUNT"))
+var eq_derivatives = derivatives.join(um, um("MATCH_ACCOUNT")===derivatives("MATCH_ACCOUNT"), "left").drop(derivatives("MATCH_ACCOUNT"))
+var fd_bonds = bonds.join(um, um("MATCH_ACCOUNT")===bonds("MATCH_ACCOUNT"), "left").drop(bonds("MATCH_ACCOUNT"))
+var mf_sip = mf.join(um, um("MATCH_ACCOUNT")===mf("MATCH_ACCOUNT"), "left").drop(mf("MATCH_ACCOUNT"))
+
+var eq_cash_res = gen_post.join(eq_cash, eq_cash("user_id")<=> gen_post("user_id") && gen_post("event_id")<=> eq_cash("event_id_l1"),"inner").drop(eq_cash("event_id_l1")).drop(eq_cash("user_id"))
+var eq_margin_res = gen_post.join(eq_margin, eq_margin("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_margin("event_id_l1"),"inner").drop(eq_margin("event_id_l1")).drop(eq_margin("user_id"))
+var eq_derivatives_res = gen_post.join(eq_derivatives, eq_derivatives("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> eq_derivatives("event_id_l1"),"inner").drop(eq_derivatives("event_id_l1")).drop(eq_derivatives("user_id"))
+var fd_bonds_res = gen_post.join(fd_bonds, fd_bonds("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> fd_bonds("event_id_l1"),"inner").drop(fd_bonds("user_id")).drop(fd_bonds("event_id_l1"))
+var mf_sip_res = gen_post.join(mf_sip, mf_sip("user_id")<=>gen_post("user_id") && gen_post("event_id")<=> mf_sip("event_id_l1"),"inner").drop(mf_sip("user_id")).drop(mf_sip("event_id_l1"))
+
+eq_cash_res.count
+eq_cash_res.select("user_id").distinct.count
+
+eq_cash_res.agg(sum("txn_metric")).show(false)//
+eq_cash_res.agg(avg("txn_metric")).show(false)//
+var m = eq_cash_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+
+eq_margin_res.agg(sum("txn_metric")).show(false)//
+eq_margin_res.agg(avg("txn_metric")).show(false)//
+var m = eq_margin_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_margin_res.count
+eq_margin_res.select("user_id").distinct.count
+
+eq_derivatives_res.agg(sum("txn_metric")).show(false)//
+eq_derivatives_res.agg(avg("txn_metric")).show(false)//
+var m = eq_derivatives_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+eq_derivatives_res.count
+eq_derivatives_res.select("user_id").distinct.count
+
+fd_bonds_res.agg(sum("txn_metric")).show(false)//
+fd_bonds_res.agg(avg("txn_metric")).show(false)//
+var m = fd_bonds_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+fd_bonds_res.count
+fd_bonds_res.select("user_id").distinct.count
+
+mf_sip_res.agg(sum("txn_metric")).show(false)//
+mf_sip_res.agg(avg("txn_metric")).show(false)//
+var m = mf_sip_res.stat.approxQuantile("txn_metric", Array(0.5), 0.25)//
+mf_sip_res.count
+mf_sip_res.select("user_id").distinct.count
+=========================================================================
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData/*")
+var ga = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/GroupA_copy/*")
+var gen_post =  gdata.filter("txn_ts > '1563129000000'").filter("txn_ts < '1565893800000'")//pre
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var recom= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/octopus/data/Results/FINAL_RECOMMENDATION_CAMP_08AUG2019/FINAL_RECOMMENDATION_CAMP_08AUG2019.csv")
+var el1= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("/OctopusLayout_v2/eventL1Map.csv")
+el1 = el1.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+recom= recom.withColumn("event_l1_name",concat($"TMD_SEGMENT",lit("_"),$"TMD_PRODUCT"))
+recom = recom.join(um, um("MATCH_ACCOUNT")===recom("TMD_MATCH_ID"),"left").drop(um("MATCH_ACCOUNT"))
+var recom1 = recom.join(el1, el1("event_l1_name")===recom("event_l1_name"),"left").drop(el1("event_l1_name"))
+var res1 = gen_post.join(recom1, recom1("user_id")=== gen_post("user_id") && gen_post("event_id")=== recom1("event_id_l1"),"inner").drop(recom1("event_id_l1")).drop(recom1("user_id"))
+var trim = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Aftr_Trming.csv")
+var s = trim.except(control)
+var res2 = gen_post.join(s, s("user_id")=== gen_post("user_id") && gen_post("event_id")=== s("event_id_l1"),"inner").drop(s("event_id_l1")).drop(s("user_id"))
+
+
+
+#### Code to find discripencies in recommendations ####
+var gdata = spark.read.parquet("/persist/habitualExploree/R21_17Aug19/genData/*")
+var gen_post =  gdata.filter("txn_ts > '1541050215000'").filter("txn_ts < '1565933415000'")
+var trim = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Aftr_Trming.csv")
+var control= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Base_Conf.csv")
+var s = trim.except(control)
+s= s.withColumnRenamed("recommendation_id","event_id_l1")
+var res2 = gen_post.join(s, s("user_id")=== gen_post("user_id") && gen_post("event_id")=== s("event_id_l1"),"inner").drop(s("event_id_l1")).drop(s("user_id"))
+var res2 = gen_post.join(trim, trim("user_id")=== gen_post("user_id") && gen_post("event_id")=== trim("event_id_l1"),"inner").drop(trim("event_id_l1")).drop(trim("user_id"))
+
+test-Period 1 nov 1541050215000
+            16 Aug 1565933415000
+
+
+
+
+
+
+-------------------------Investigation------------------
+
+var gdata1 = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData/*")
+var gen_test =  gdata.filter("txn_ts > '1541010600000L'").filter("txn_ts < '1565893800000L'")//1nov-16Aug
+recom = recom.join(um, um("MATCH_ACCOUNT")===recom("TMD_MATCH_ID"),"left").drop(um("MATCH_ACCOUNT"))
+var res2 = gen_test.join(s, s("user_id")=== gen_test("user_id") && gen_test("event_id")=== s("event_id_l1"),"inner").drop(s("event_id_l1")).drop(s("user_id"))
+1541010600000 //1 nov 18
+1565893800000 //16 Aug 19
+
+
+### Abhijeet##
+var gdata = spark.read.parquet("/persist/habitualExploree/test_04Nov19/genData/*")
+var gen_post =  gdata.filter("txn_ts > '1541010600000'").filter("txn_ts < '1565893800000'")
+//var trim = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Aftr_Trming.csv")
+//var control= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Base_Conf.csv")
+//var s = trim.except(control)
+//s= s.withColumnRenamed("recommendation_id","event_id_l1")
+s = spark.read.parquet("/persist/habitualExploree/test_04Nov19/habitualTOp
+var res_abhi = gen_post.join(s, s("user_id")=== gen_post("user_id") && gen_post("event_id")=== s("event_id_l1"),"inner").drop(s("event_id_l1")).drop(s("user_id"))
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+=========================================modifying mutateddata prep================
+import scala.sys
+
+var fe = spark.read.parquet("/icici/demog_with_fe/*")
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+
+var sdp = spark.read.parquet("/persist/habitualExploree/test1_04Nov19/mutatedScoreDataPrep/*/*")
+
+var x = fe.join(um, um("MATCH_ACCOUNT") === fe("MATCH_ACCOUNT_1"),"left").drop(um("MATCH_ACCOUNT"))
+x = x.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER","MAIL_CUST_ID")
+
+var r= sdp.join(x, x("user_id") === sdp("user_id"),"inner").drop(x("user_id"))
+
+r=r.drop("5001","5002","5003","5004","5005","5006","5007","5008","5009","5010","6001","6002","6003","7001","7002","7003","7004","7005","7006","7007","7008","7009","7010","7011","8001","8002","9001","9002","9003","MATCH_ACCOUNT_1")
+
+var y = r.withColumnRenamed("Slab_1","5001")
+y = y.withColumnRenamed("Slab_2","5002")
+y = y.withColumnRenamed("Slab_3","5003")
+y = y.withColumnRenamed("Slab_4","5004")
+y = y.withColumnRenamed("Slab_5","5005")
+y = y.withColumnRenamed("Slab_6","5006")
+y = y.withColumnRenamed("Slab_7","5007")
+y = y.withColumnRenamed("Slab_8","5008")
+y = y.withColumnRenamed("Slab_9","5009")
+y = y.withColumnRenamed("Slab_10","5010")
+y = y.withColumnRenamed("HNI_1","6001")
+y = y.withColumnRenamed("HNI_2","6002")
+y = y.withColumnRenamed("HNI_3","6003")
+y = y.withColumnRenamed("Occup_1","7001")
+y = y.withColumnRenamed("Occup_2","7002")
+y = y.withColumnRenamed("Occup_3","7003")
+y = y.withColumnRenamed("Occup_4","7004")
+y = y.withColumnRenamed("Occup_5","7005")
+y = y.withColumnRenamed("Occup_6","7006")
+y = y.withColumnRenamed("Occup_7","7007")
+y = y.withColumnRenamed("Occup_8","7008")
+y = y.withColumnRenamed("Occup_9","7009")
+y = y.withColumnRenamed("Occup_10","7010")
+y = y.withColumnRenamed("Occup_11","7011")
+y = y.withColumnRenamed("Marg_1","8001")
+y = y.withColumnRenamed("Marg_2","8002")
+y = y.withColumnRenamed("GENDER_1","9001")
+y = y.withColumnRenamed("GENDER_2","9002")
+y = y.withColumnRenamed("GENDER_3","9003")
+
+y.write.parquet("/persist/habitualExploree/test1_04Nov19/mutatedScoreDataPrep_copy/*")
+
+hdfs dfs -mv /persist/habitualExploree/test1_04Nov19/mutatedScoreDataPrep_copy /persist/habitualExploree/test1_04Nov19/mutatedScoreDataPrep/
++++++++++++++++++++++++++++++++++++++++++modifying ScoreDataPrep+++++++++++++++++++++
+import scala.sys
+
+var fe = spark.read.parquet("/icici/demog_with_fe/*")
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+
+var sdp = spark.read.parquet("/persist/habitualExploree/test1_04Nov19/scoreDataPrep/*")
+
+var x = fe.join(um, um("MATCH_ACCOUNT") === fe("MATCH_ACCOUNT_1"),"left").drop(um("MATCH_ACCOUNT"))
+x = x.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER","MAIL_CUST_ID")
+
+var r= sdp.join(x, x("user_id") === sdp("user_id"),"inner").drop(x("user_id"))
+
+r=r.drop("5001","5002","5003","5004","5005","5006","5007","5008","5009","5010","6001","6002","6003","7001","7002","7003","7004","7005","7006","7007","7008","7009","7010","7011","8001","8002","9001","9002","9003","MATCH_ACCOUNT_1")
+
+var y = r.withColumnRenamed("Slab_1","5001")
+y = y.withColumnRenamed("Slab_2","5002")
+y = y.withColumnRenamed("Slab_3","5003")
+y = y.withColumnRenamed("Slab_4","5004")
+y = y.withColumnRenamed("Slab_5","5005")
+y = y.withColumnRenamed("Slab_6","5006")
+y = y.withColumnRenamed("Slab_7","5007")
+y = y.withColumnRenamed("Slab_8","5008")
+y = y.withColumnRenamed("Slab_9","5009")
+y = y.withColumnRenamed("Slab_10","5010")
+y = y.withColumnRenamed("HNI_1","6001")
+y = y.withColumnRenamed("HNI_2","6002")
+y = y.withColumnRenamed("HNI_3","6003")
+y = y.withColumnRenamed("Occup_1","7001")
+y = y.withColumnRenamed("Occup_2","7002")
+y = y.withColumnRenamed("Occup_3","7003")
+y = y.withColumnRenamed("Occup_4","7004")
+y = y.withColumnRenamed("Occup_5","7005")
+y = y.withColumnRenamed("Occup_6","7006")
+y = y.withColumnRenamed("Occup_7","7007")
+y = y.withColumnRenamed("Occup_8","7008")
+y = y.withColumnRenamed("Occup_9","7009")
+y = y.withColumnRenamed("Occup_10","7010")
+y = y.withColumnRenamed("Occup_11","7011")
+y = y.withColumnRenamed("Marg_1","8001")
+y = y.withColumnRenamed("Marg_2","8002")
+y = y.withColumnRenamed("GENDER_1","9001")
+y = y.withColumnRenamed("GENDER_2","9002")
+y = y.withColumnRenamed("GENDER_3","9003")
+
+y.write.parquet("/persist/habitualExploree/test1_04Nov19/scoreDataPrep_copy/*")
+
+hdfs dfs -mv /persist/habitualExploree/test1_04Nov19/scoreDataPrep_copy /persist/habitualExploree/test1_04Nov19/scoreDataPrep
+
+
+###################### Running prepost stage after removing problematic user #############
+
+//var recom= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/octopus/data/Results/FINAL_RECOMMENDATION_CAMP_08AUG2019/FINAL_RECOMMENDATION_CAMP_08AUG2019.csv") 
+//test-Period 1 nov 1541050215000
+//            16 Aug 1565933415000
+
+var gdata = spark.read.parquet("/persist/habitualExploree/R21_17Aug19/genData/*")
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var gen_pre =  gdata.filter("txn_ts > '1541050215000'").filter("txn_ts < '1565933415000'")//test-Period 1 nov 1541050215000 16 Aug 1565933415000
+var trim = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Aftr_Trming.csv")
+var control= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Base_Conf.csv")
+var s = trim.except(control)
+s= s.withColumnRenamed("recommendation_id","event_id_l1")
+control= control.withColumnRenamed("recommendation_id","event_id_l1")
+var res_recom = gen_pre.join(s, s("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== s("event_id_l1"),"inner").drop(s("event_id_l1")).drop(s("user_id"))
+//10446803,16318 uniq_user 
+var res_control = gen_pre.join(control, control("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== control("event_id_l1"),"inner").drop(control("event_id_l1")).drop(control("user_id"))
+//351262, 742 uniq_usr
+var recom_prob_user = res_recom.select("user_id").distinct//16318
+var control_prob_user = res_control.select("user_id").distinct//742
+
+var normal_recom_user = s.select("user_id").distinct.except(recom_prob_user)//208993
+var normal_control_user = control.select("user_id").distinct.except(control_prob_user)//9258
+
+var normal_recom = normal_recom_user.join(s, s("user_id")===normal_recom_user("user_id"),"inner").drop(s("user_id"))//208993
+var normal_control = normal_control_user.join(control, control("user_id")===normal_control_user("user_id"),"inner").drop(control("user_id"))//9258
+
+## Sanity Chek on production runid R21_17Aug19##
+var res1_recom = gen_pre.join(normal_recom, normal_recom("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== normal_recom("event_id_l1"),"inner").drop(normal_recom("event_id_l1")).drop(normal_recom("user_id"))
+var res1_control = gen_pre.join(normal_control, normal_control("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== normal_control("event_id_l1"),"inner").drop(normal_control("event_id_l1")).drop(normal_control("user_id"))
+//0
+//0
+
+## Sanity check for Prepost run id R1P_19Oct19 ###
+var gdata_latest = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData/*")
+var gen_pre_latest =  gdata_latest.filter("txn_ts > '1541050215000'").filter("txn_ts < '1565933415000'")
+var res1_recom_latest = gen_pre_latest.join(normal_recom, normal_recom("user_id")=== gen_pre_latest("user_id") && gen_pre_latest("event_id")=== normal_recom("event_id_l1"),"inner").drop(normal_recom("event_id_l1")).drop(normal_recom("user_id"))
+var res1_control_latest = gen_pre_latest.join(normal_control, normal_control("user_id")=== gen_pre_latest("user_id") && gen_pre_latest("event_id")=== normal_control("event_id_l1"),"inner").drop(normal_control("event_id_l1")).drop(normal_control("user_id"))
+
+res1_recom_latest.count//10
+res1_control_latest.count//0
+
+## write all the normal users of control and recom base to prepost wala runid ####
+## now after sanity check we can dump to prepost run id R1P_19Oct19
+normal_recom.write.parquet("/persist/habitualExploree/R1P_19Oct19/habitualTopNRecomms_recombase")
+normal_control.write.parquet("/persist/habitualExploree/R1P_19Oct19/habitualTopNRecomms_controlbase")
+
+## Edit the execute function with name of the file like habitualTopNRecomms input as well agg and recowise file name while dumping ##
+Then ./prepost.sh for controlbase and for recombase 
+
+## Prepost report on Open base## 05 Nov 19
+----------------------------------------------
+//var gdata = spark.read.parquet("/OctopusLayout_v2/transactions/*")
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData_copy/*")
+//var gen_post = gdata.filter("txn_ts > '1568226600000'").filter("txn_ts < '1571077800000'")
+var gen_post =  gdata.filter("txn_ts > '1563129000000'").filter("txn_ts < '1565893800000'")//pre-period
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var camp = spark.read.parquet("/campaign/inputfile_data/*")
+//=== filter Open base ====
+
+camp = camp.filter("ACTION = 'Open'")//83264
+var demog = spark.read.parquet("/icici/Raw_demog_v3/*")
+demog = demog.withColumn("MAIL_CUST_ID", trim($"MAIL_CUST_ID"))
+demog = demog.withColumn("MATCH_ACCOUNT_1", trim($"MATCH_ACCOUNT_1"))
+demog = demog.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER")
+demog = demog.withColumnRenamed("MATCH_ACCOUNT_1","MATCH_ACCOUNT")
+var r = camp.join(demog, demog("MAIL_CUST_ID")===camp("MTCH_ACC"), "inner").drop(demog("MAIL_CUST_ID")) if "left" join 1429 MATCH_ACCOUNT problem in raw_demog_v3 not in mail_cust_id as there is no nulls in mail_cust_id col.
+taking inner join
+r.count//83264 for left join //81835 for inner join "ALSO ONLY 14 DISTINCT MAILER CODE IN r
+
+var cash = r.filter($"MAILER_CODE" === 18441 || $"MAILER_CODE" === 18502 || $"MAILER_CODE" === 18607)
+cash.count//25565
+var margin = r.filter($"MAILER_CODE" === 18443 || $"MAILER_CODE" === 18504 || $"MAILER_CODE" === 18622 )
+margin.count//17422
+var derivatives = r.filter($"MAILER_CODE" === 18440 || $"MAILER_CODE" === 18505 || $"MAILER_CODE" === 18691 )
+derivatives.count//20366
+var bonds = r.filter($"MAILER_CODE" === 18439 || $"MAILER_CODE" === 18501 || $"MAILER_CODE" === 18605)
+bonds.count//11993
+var mf = r.filter($"MAILER_CODE" === 18442 || $"MAILER_CODE" === 18531 || $"MAILER_CODE" === 18606)
+mf.count//6489
+
+cash.select("MATCH_ACCOUNT").distinct.count//11359
+margin.select("MATCH_ACCOUNT").distinct.count//7476
+derivatives.select("MATCH_ACCOUNT").distinct.count//8926
+bonds.select("MATCH_ACCOUNT").distinct.count//4670
+mf.select("MATCH_ACCOUNT").distinct.count//3419
+
+cash = cash.withColumn("event_id_l1", lit(3)).withColumn("event_l1_name", lit("EQUITY_CASH"))
+margin = margin.withColumn("event_id_l1", lit(11)).withColumn("event_l1_name", lit("EQUITY_MARGIN"))
+derivatives = derivatives.withColumn("event_id_l1", lit(55)).withColumn("event_l1_name", lit("EQUITY_DERIVATIVES_OptionsPLUS"))
+bonds = bonds.withColumn("event_id_l1", lit(34)).withColumn("event_l1_name", lit("FD_BONDS_FIXED DEPOSITS"))
+mf = mf.withColumn("event_id_l1", lit(35)).withColumn("event_l1_name", lit("MF_SIP"))
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++OVER+++++++++++++++++++++++++++++++++++++++++++++
+=================Documentation==========================
+
+1. Rectified problem that feature engineering was not happening in SDPREF thats why reference probability was coming up
+2. solution is to run sdp_edit.scala and mutateddf_edit.scala in /opt/platform/conf folder
+
+Important file paths
+
+1. path to habitual /opt/octopus/data/habitual-spark
+2. path to recommendation file handed to client /opt/octopus/data/Results/FINAL_RECOM.......(2.35Lac)
+3. Path to file after trim /opt/platform/Aftr_Trming.csv (2.35 Lac)
+4. Path to control base /opt/platform/Base_conf.csv (10k)
+5. path to Raw data by clients productwise /opt/octopus/data/inputfiles/
+
+Important Hadoop paths
+
+1. Production Runid: On which recommendation served : R21_17Aug19 contains genData till 1 july17 to 15Aug19 ran on/Octopus_v2
+2. Production run id for Pre-post and campaign R1P_19Oct19 its genData is 1 july17 to 14Oct19 ran on /Octopus_v2
+3. /OctopusLayout_v2 is uptoDate and has data till 14 Oct19
+4. campaign data till Date for 3Loq campaign is in /campaign/inputfile_data/
+5. campaign data in proper schema to run stage is in /campaign/final_data1/*
+6. After removing problematic user from Aftr trim file and control base the final files are dumped in    R1P_19Oct19/habitualTopNRecomms_recombase   and  R1P_19Oct19/habitualTopNRecomms_controlbase
+
+7. we can remove problematic user on openbase as well //TO-DO
+8. Right Now we have to run prepost code on all bases open, recom, and control base, in oreder to do this just open the file postAnalysisStage.scala and edit input_file name mentioned at HARD-CODED-PATH comment and alse agg and recowise file name where it gets dumped, run this stage three times by modifying these three names.//TO-DO to take these paths from conf
+EVERY time the schema need to be same for all the bases for input files.e.g. schema of topNRecomms file
+
+running prepost takes topnRecomms and genData as input and outputs GroupA,GroupB,Agg,Recowise
+
+9. To run campaign stage mention the file name in conf with proper schema (sent,open,click,MATCH_ACCOUNT like in /campaign/final_data1/)
+10. Runid test_04Nov19 is for changes suggested by abhijeet
+11. Runid test1_04Nov19 is check for habitual we can delete genData for test2_04Nov19 it ran on V2 for testing pupose.
+
+
+
+
+ 

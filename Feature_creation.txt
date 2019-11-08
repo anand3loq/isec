@@ -1,0 +1,492 @@
+var country_hc = Seq(
+("INDIA",1,0,0,0,0,0),
+("UAE",0,1,0,0,0,0),
+("USA",0,0,1,0,0,0),
+("UNITED KINGDOM",0,0,0,1,0,0),
+("SINGAPORE",0,0,0,0,1,0),
+("other",0,0,0,0,0,1)
+,("SOUTH AFRICA",0,0,0,0,0,1)        
+,("BAHAMAS",0,0,0,0,0,1)               
+,("BURMA",0,0,0,0,0,1)                 
+,("CAMBODIA",0,0,0,0,0,1)              
+,("JAPAN",0,0,0,0,0,1)                 
+,("BANGLADESH",0,0,0,0,0,1)            
+,("UGANDA",0,0,0,0,0,1)                
+,("CNTRYDOT0",0,0,0,0,0,1)             
+,("JERSEY",0,0,0,0,0,1)                
+,("TANZANIA",0,0,0,0,0,1)              
+,("MALDIVES",0,0,0,0,0,1)              
+,("JORDAN",0,0,0,0,0,1)                
+,("LESOTHO",0,0,0,0,0,1)               
+,("MALTA",0,0,0,0,0,1)                 
+,("EQUATORIAL GUINEA",0,0,0,0,0,1)     
+,("ANTIGUA AND BARBUDA",0,0,0,0,0,1)   
+,("MAURITIUS",0,0,0,0,0,1)             
+,("KUWAIT",0,0,0,0,0,1)                
+,("AZERBAIJAN",0,0,0,0,0,1)            
+,("PHILIPPINES",0,0,0,0,0,1)           
+,("SENEGAL",0,0,0,0,0,1)               
+,("OMAN",0,0,0,0,0,1)                  
+,("ESTONIA",0,0,0,0,0,1)               
+,("BRUNEI",0,0,0,0,0,1)                
+,("FIJI",0,0,0,0,0,1)                  
+,("SOUTH KOREA",0,0,0,0,0,1)           
+,("CANADA",0,0,0,0,0,1)                
+,("POLAND",0,0,0,0,0,1)                
+,("SLOVAKIA",0,0,0,0,0,1)              
+,("SRI LANKA",0,0,0,0,0,1)             
+,("COLOMBIA",0,0,0,0,0,1)              
+,("ALGERIA",0,0,0,0,0,1)               
+,("GIBRALTAR",0,0,0,0,0,1)             
+,("ARUBA",0,0,0,0,0,1)                 
+,("BENIN",0,0,0,0,0,1)                 
+,("LIBERIA",0,0,0,0,0,1)               
+,("MOROCCO",0,0,0,0,0,1)               
+,("REUNION",0,0,0,0,0,1)               
+,("BOSNIA AND HERZEGOVINA",0,0,0,0,0,1)
+,("MEXICO",0,0,0,0,0,1)                
+,("CAMEROON",0,0,0,0,0,1)              
+,("BURUNDI",0,0,0,0,0,1)               
+,("FRANCE",0,0,0,0,0,1)                
+,("GABON",0,0,0,0,0,1)                 
+,("GAMBIA",0,0,0,0,0,1)                
+,("CAYMAN ISLANDS",0,0,0,0,0,1)        
+,("MOZAMBIQUE",0,0,0,0,0,1)            
+,("NETHERLAND",0,0,0,0,0,1)            
+,("MADAGASCAR",0,0,0,0,0,1)            
+,("NIGERIA",0,0,0,0,0,1)               
+,("CHINA",0,0,0,0,0,1)                
+,("MALAYSIA",0,0,0,0,0,1)              
+,("AUSTRIA",0,0,0,0,0,1)               
+,("ZAMBIA",0,0,0,0,0,1)                
+,("LATVIA",0,0,0,0,0,1)                
+,("BOTSWANA",0,0,0,0,0,1)              
+,("NEPAL",0,0,0,0,0,1)                 
+,("SAINT_LUCIA",0,0,0,0,0,1)           
+,("MALI",0,0,0,0,0,1)                  
+,("KYRGYZSTAN",0,0,0,0,0,1)            
+,("ZIMBABWE",0,0,0,0,0,1)              
+,("BELIZE",0,0,0,0,0,1)                
+,("SAUDI ARABIA",0,0,0,0,0,1)         
+,("CROATIA",0,0,0,0,0,1)               
+,("MARSHALL ISLANDS",0,0,0,0,0,1)      
+,("SURINAME",0,0,0,0,0,1)              
+,("RWANDA",0,0,0,0,0,1)                
+,("SWITZERLAND",0,0,0,0,0,1)           
+,("BULGARIA",0,0,0,0,0,1)              
+,("KAZAKHSTAN",0,0,0,0,0,1)            
+,("ARGENTINA",0,0,0,0,0,1)            
+,("SUDAN",0,0,0,0,0,1)                
+,("HONG KONG",0,0,0,0,0,1)             
+,("NORWAY",0,0,0,0,0,1)                
+,("COSTA_RICA",0,0,0,0,0,1)            
+,("FINLAND",0,0,0,0,0,1)               
+,("MALAWI",0,0,0,0,0,1)                
+,("BRITISH VIRGIN ISLANDS",0,0,0,0,0,1)
+,("ANGOLA",0,0,0,0,0,1)                
+,("COTE DIVOIRE",0,0,0,0,0,1)          
+,("GUYANA",0,0,0,0,0,1)                
+,("SLOVENIA",0,0,0,0,0,1)              
+,("UZBEKISTAN",0,0,0,0,0,1)            
+,("TUNISIA",0,0,0,0,0,1)               
+,("IRAN",0,0,0,0,0,1)                  
+,("SWEDEN",0,0,0,0,0,1)                
+,("BRUNEI_DARUSSALAM",0,0,0,0,0,1)                      
+,("REPUBLIC OF DJIBOUTI",0,0,0,0,0,1) 
+,("BELGIUM",0,0,0,0,0,1)               
+,("RUSSIA",0,0,0,0,0,1)                
+,("CZECH_REPUBLIC",0,0,0,0,0,1)        
+,("TRINIDAD AND TOBAGO",0,0,0,0,0,1)   
+,("NAMIBIA",0,0,0,0,0,1)               
+,("NEW ZEALAND",0,0,0,0,0,1)           
+,("SPAIN",0,0,0,0,0,1)                 
+,("PARAGUAY",0,0,0,0,0,1)             
+,("GREECE",0,0,0,0,0,1)                
+,("LEBANON",0,0,0,0,0,1)                               
+,("BERMUDA",0,0,0,0,0,1)               
+,("TAIWAN",0,0,0,0,0,1)                
+,("KENYA",0,0,0,0,0,1)                 
+,("TURKEY",0,0,0,0,0,1)                
+,("LUXEMBOURG",0,0,0,0,0,1)            
+,("AFGHANISTAN",0,0,0,0,0,1)           
+,("COLUMBIA",0,0,0,0,0,1)              
+,("PAPUA_NEW_GUINEA",0,0,0,0,0,1)      
+,("NETHERLANDS ANTILLES",0,0,0,0,0,1) 
+,("ITALY",0,0,0,0,0,1)                 
+,("MONACO",0,0,0,0,0,1)                
+,("PANAMA",0,0,0,0,0,1)                
+,("MACAU",0,0,0,0,0,1)                 
+,("CHILE",0,0,0,0,0,1)                 
+,("IRAQ",0,0,0,0,0,1)                  
+,("DENMARK",0,0,0,0,0,1)               
+,("THAILAND",0,0,0,0,0,1)              
+,("HUNGARY",0,0,0,0,0,1)               
+,("QATAR",0,0,0,0,0,1)                 
+,("JAMAICA",0,0,0,0,0,1)               
+,("CONGO",0,0,0,0,0,1)                 
+,("VIETNAM",0,0,0,0,0,1)               
+,("SERBIA AND MONTENEGRO",0,0,0,0,0,1) 
+,("DJIBOUTI",0,0,0,0,0,1)              
+,("SIERRA_LEONE",0,0,0,0,0,1)          
+,("CYPRUS",0,0,0,0,0,1)                
+,("SEYCHELLES",0,0,0,0,0,1)            
+,("ETHIOPIA",0,0,0,0,0,1)              
+,("ISRAEL",0,0,0,0,0,1)                
+,("PORTUGAL",0,0,0,0,0,1)              
+,("INDONESIA",0,0,0,0,0,1)            
+,("YEMEN",0,0,0,0,0,1)                 
+,("IRELAND",0,0,0,0,0,1)               
+,("ROMANIA",0,0,0,0,0,1)               
+,("ERITREA",0,0,0,0,0,1)               
+,("GERMANY",0,0,0,0,0,1)               
+,("GHANA",0,0,0,0,0,1)                 
+,("BRAZIL",0,0,0,0,0,1)                
+,("ISLE OF MAN",0,0,0,0,0,1)           
+,("LIBYA",0,0,0,0,0,1)                 
+,("EGYPT",0,0,0,0,0,1)                 
+,("VENEZUELA",0,0,0,0,0,1)             
+,("BAHRAIN",0,0,0,0,0,1)               
+,("TIMOR LESTE",0,0,0,0,0,1)           
+,("PERU",0,0,0,0,0,1)                  
+,("MYANMAR",0,0,0,0,0,1)               
+,("GEORGIA",0,0,0,0,0,1)).toDF("country_name","COUNTRY_1","COUNTRY_2","COUNTRY_3","COUNTRY_4","COUNTRY_5","COUNTRY_6")
+x.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER","MAIL_CUST_ID")
+
+
+var type_acc = Seq(("IND",1,0,0,0),
+                   ("NRI",0,1,0,0),
+                   ("COR",0,0,1,0),
+                   ("HUF",0,0,0,1),
+                   ("FESOP",0,0,0,1),
+                   ("PAR",0,0,0,1)).toDF("TYPE_OF_ACCOUNT","Acc_Typ_1","Acc_Typ_2","Acc_Typ_3","Acc_Typ_4")
+
+
+
+inc>>INCOME_SLAB
+Gender 
+country_hc
+occup
+Mar_Sts
+Hni
+type_acc
+
+
+n.select("COUNTRY","COUNTRY_1","COUNTRY_2","COUNTRY_3","COUNTRY_4","COUNTRY_5","COUNTRY_6")
+n.select("OCCUPATION","Occup_1","Occup_2","Occup_3","Occup_4","Occup_5","Occup_6","Occup_7","Occup_8","Occup_9","Occup_10","Occup_11")
+n.select("GENDER","GENDER_1","GENDER_2","GENDER_3")
+n.select("HNI_CUSTOMER","HNI_1","HNI_2","HNI_3")
+n.select("TYPE_OF_ACCOUNT","Acc_Typ_1","Acc_Typ_2","Acc_Typ_3","Acc_Typ_4")
+n.select("MARTIAL_STATUS","Marg_1","Marg_2")
+=======================================================================================
+GENDER,Gender
+("GENDER","OCCUPATION","MARTIAL_STATUS","HNI_CUSTOMER","INCOME_SLAB")
+
+ var n = demog.join(Gender,demog("GENDER") === Gender("GENDER"),"left_outer").drop(Gender("GENDER"))
+ n = n.join(occup,n("OCCUPATION") === occup("OCCUPATION"),"left_outer").drop(occup("OCCUPATION"))
+ n = n.join(Mar_Sts,n("MARTIAL_STATUS") === Mar_Sts("Marital_status"),"left_outer").drop( Mar_Sts("Marital_status"))
+ n = n.join(Hni,n("HNI_CUSTOMER") === Hni("HNI_CUSTOMER"),"left_outer").drop(Hni("HNI_CUSTOMER"))
+
+
+ n = n.join(inc,n("INCOME_SLAB") === inc("INCOME_SLAB"),"left_outer").drop( inc("INCOME_SLAB"))
+
+
+=================================================================
+OneHotCoding
+--------------
+var Gender = Seq(("M",1,0,0),
+                 ("m",1,0,0),
+                 ("F",0,1,0),
+                 ("f",0,1,0),
+                 ("S",0,0,1),
+                 ("O",0,0,1)).toDF("GENDER","GENDER_1","GENDER_2","GENDER_3")
+
+
+var occup = Seq(("PRIVATE SECTOR",1,0,0,0,0,0,0,0,0,0,0),
+("SERVICE",0,1,0,0,0,0,0,0,0,0,0),
+("HOUSEWIFE",0,0,1,0,0,0,0,0,0,0,0),
+("SELFEMPLOYED",0,0,0,1,0,0,0,0,0,0,0),
+("PROFESSIONAL",0,0,0,0,1,0,0,0,0,0,0),
+("BUSINESS",0,0,0,0,0,1,0,0,0,0,0),
+("RETIRED",0,0,0,0,0,0,1,0,0,0,0),
+("GOVERMENT SERVICE",0,0,0,0,0,0,0,1,0,0,0),
+("STUDENT",0,0,0,0,0,0,0,0,1,0,0),
+("PUBLIC SECTOR",0,0,0,0,0,0,0,0,0,1,0),
+("OTHERS",0,0,0,0,0,0,0,0,0,0,1),
+("OTHER CHEMS AND CHEM PRO",0,0,0,0,0,0,0,0,0,0,1),
+("MOTOR VEHICLES AND PARTS",0,0,0,0,0,0,0,0,0,0,1),
+("FOREX DEALER",0,0,0,0,0,0,0,0,0,0,1),
+("PRINTING AND ALLIED ACTVT",0,0,0,0,0,0,0,0,0,0,1),
+("OILSEEDS",0,0,0,0,0,0,0,0,0,0,1),
+("FLORICULTURE AND HORTICUL",0,0,0,0,0,0,0,0,0,0,1),
+("INDIGENOUS SUGAR",0,0,0,0,0,0,0,0,0,0,1),
+("PAINTS VARNISHES LACQUIR",0,0,0,0,0,0,0,0,0,0,1),
+("DAIRYING",0,0,0,0,0,0,0,0,0,0,1),
+("FOOD PROCUREMENT",0,0,0,0,0,0,0,0,0,0,1),
+("CONSULTANCY SERVICES",0,0,0,0,0,0,0,0,0,0,1),
+("HANDICRAFTS",0,0,0,0,0,0,0,0,0,0,1),
+("AGRICULTURE",0,0,0,0,0,0,0,0,0,0,1),
+("BICYCLES CYCLERICKSHAWS",0,0,0,0,0,0,0,0,0,0,1),
+("COMMERCIALS BANKS",0,0,0,0,0,0,0,0,0,0,1),
+("CONSTRUCTION",0,0,0,0,0,0,0,0,0,0,1),
+("FARMERS SERVICE SOCS",0,0,0,0,0,0,0,0,0,0,1),
+("ALL OTHER CROPS",0,0,0,0,0,0,0,0,0,0,1),
+("GARMENTS AND WEARING APPA",0,0,0,0,0,0,0,0,0,0,1),
+("CEREALS",0,0,0,0,0,0,0,0,0,0,1),
+("RICE MILLS FLOUR AND DA",0,0,0,0,0,0,0,0,0,0,1),
+("ALL OTHER LOANS",0,0,0,0,0,0,0,0,0,0,1),
+("STAFF HSG LOANS",0,0,0,0,0,0,0,0,0,0,1),
+("OTHER RETAIL TRADE",0,0,0,0,0,0,0,0,0,0,1),
+("WOOLLEN TEXTILES",0,0,0,0,0,0,0,0,0,0,1),
+("RECREATION SERVICES",0,0,0,0,0,0,0,0,0,0,1),
+("SUGARCANE OR SUGARBEET",0,0,0,0,0,0,0,0,0,0,1),
+("OTHER COOP PROCESG",0,0,0,0,0,0,0,0,0,0,1),
+("OTHER SERVICES",0,0,0,0,0,0,0,0,0,0,1),
+("EDUCATION",0,0,0,0,0,0,0,0,0,0,1),
+("AGRI CUSTOM SERV UNITS",0,0,0,0,0,0,0,0,0,0,1),
+("MERCHANT BKG OR FINANCL SERS",0,0,0,0,0,0,0,0,0,0,1),
+("PROCESSING CANNING",0,0,0,0,0,0,0,0,0,0,1),
+("OTHER",0,0,0,0,0,0,0,0,0,0,1),
+("PUBLIC UTILITY SERVSPVT",0,0,0,0,0,0,0,0,0,0,1),
+("MANGANESE ORE MINING",0,0,0,0,0,0,0,0,0,0,1),
+("IRON ORE MINING",0,0,0,0,0,0,0,0,0,0,1),
+("AGRICLTRL IMPLS AND MAC",0,0,0,0,0,0,0,0,0,0,1),
+("SOLAR ENERGY WIND MILLS",0,0,0,0,0,0,0,0,0,0,1),
+("RAILWAY TRANSPORT",0,0,0,0,0,0,0,0,0,0,1),
+("INDUSTRIALIST",0,0,0,0,0,0,0,0,0,0,1),
+("OTHERS INCLDG INSURANCE",0,0,0,0,0,0,0,0,0,0,1),
+("EXTRTNCRUDE PETROLEUM",0,0,0,0,0,0,0,0,0,0,1),
+("AGENTSESTATE AGENTS",0,0,0,0,0,0,0,0,0,0,1),
+("SHROFFS AND OTHER INDIGEN",0,0,0,0,0,0,0,0,0,0,1),
+("TEASHORT TERM FINANCE",0,0,0,0,0,0,0,0,0,0,1),
+("SILK SYNTHETIC FIBRES",0,0,0,0,0,0,0,0,0,0,1),
+("PROFL SERVICES",0,0,0,0,0,0,0,0,0,0,1),
+("SOFTWARE DEV SERVICES",0,0,0,0,0,0,0,0,0,0,1),
+("ALL OTHER MISC INDS",0,0,0,0,0,0,0,0,0,0,1),
+("PRIMARY AGRI CREDIT SOCS",0,0,0,0,0,0,0,0,0,0,1),
+("AGRI FINANCE CORPN AND CO",0,0,0,0,0,0,0,0,0,0,1),
+("AGRICULTRL IMPLS AND MAC",0,0,0,0,0,0,0,0,0,0,1),
+("NONEDIBLE OILS",0,0,0,0,0,0,0,0,0,0,1),
+("NEWSPAPER AND MAG PUBCNS",0,0,0,0,0,0,0,0,0,0,1),
+("LANDLORD",0,0,0,0,0,0,0,0,0,0,1)).toDF("OCCUPATION","Occup_1","Occup_2","Occup_3","Occup_4","Occup_5","Occup_6","Occup_7","Occup_8","Occup_9","Occup_10","Occup_11")
+
+
+
+
+
+var Mar_Sts = Seq(("Y",1,0),("N",0,1)).toDF("Marital_status","Marg_1","Marg_2")
+
+var Hni = Seq(("PCGHN1",1,0,0),
+                   ("PCGWEL",1,0,0),
+                   ("WEALTH",1,0,0),
+                   ("PREMIER",0,1,0),
+                   ("SBC",0,0,1),
+                   ("N",0,0,1),
+                   ("NONE",0,0,1)).toDF("HNI_CUSTOMER","HNI_1","HNI_2","HNI_3")
+
+
+
+
+var inc = Seq(("20 LAC TO 25 LAC",1,0,0,0,0,0,0,0,0,0),
+("1 LAC TO 5 LAC",0,1,0,0,0,0,0,0,0,0),
+("50 LAC TO 1 CR",0,0,1,0,0,0,0,0,0,0),
+("15 LAC TO 20 LAC",0,0,0,1,0,0,0,0,0,0),
+("< 1 LAC",0,0,0,0,1,0,0,0,0,0),
+("5 LAC TO 10 LAC",0,0,0,0,0,1,0,0,0,0),
+("> 1 CR",0,0,0,0,0,0,1,0,0,0),
+("OTHER",0,0,0,0,0,0,0,1,0,0),
+("25 LAC TO 50 LAC",0,0,0,0,0,0,0,0,1,0),
+("10 LAC TO 15 LAC",0,0,0,0,0,0,0,0,0,1)).toDF("INCOME_SLAB","Slab_1","Slab_2","Slab_3","Slab_4","Slab_5","Slab_6","Slab_7","Slab_8","Slab_9","Slab_10")
+
++----------------+
+|     INCOME_SLAB|
++----------------+
+|20 LAC TO 25 LAC|
+|  1 LAC TO 5 LAC|
+|  50 LAC TO 1 CR|
+|15 LAC TO 20 LAC|
+|         < 1 LAC|
+| 5 LAC TO 10 LAC|
+|         > 1 CR |
+|           OTHER|
+|25 LAC TO 50 LAC|
+|10 LAC TO 15 LAC|
++----------------+
+
+n.select("user_id","Slab_1","Slab_2","Slab_3","Slab_4","Slab_5","Slab_6","Slab_7","Slab_8","Slab_9","Slab_10","HNI_1","HNI_2","HNI_3")
+
+
+
+sl = sl.drop("Acc_Typ_1","Acc_Typ_2","Acc_Typ_3","Acc_Typ_4","COUNTRY_1","COUNTRY_2","COUNTRY_3","COUNTRY_4","COUNTRY_5","COUNTRY_6")
+
+
+
+//TRIM
+demog = demog.withColumn("INCOME_SLL",ltrim(col("INCOME_SLAB")))
+demog = demog.withColumn("INCOME_SLL2",rtrim(col("INCOME_SLL")))
+demog = demog.drop("INCOME_SLL","INCOME_SLAB")
+demog = demog.withColumnRenamed("INCOME_SLL2" , "INCOME_SLAB")
+
+demog = demog.withColumn("INCOME_SLL",ltrim(col("GENDER")))
+demog = demog.withColumn("INCOME_SLL2",rtrim(col("INCOME_SLL")))
+demog = demog.drop("INCOME_SLL","GENDER")
+demog = demog.withColumnRenamed("INCOME_SLL2" , "GENDER")
+
+demog = demog.withColumn("INCOME_SLL",ltrim(col("MARTIAL_STATUS")))
+demog = demog.withColumn("INCOME_SLL2",rtrim(col("INCOME_SLL")))
+demog = demog.drop("INCOME_SLL","MARTIAL_STATUS")
+demog = demog.withColumnRenamed("INCOME_SLL2" , "MARTIAL_STATUS")
+
+demog = demog.withColumn("INCOME_SLL",ltrim(col("HNI_CUSTOMER")))
+demog = demog.withColumn("INCOME_SLL2",rtrim(col("INCOME_SLL")))
+demog = demog.drop("INCOME_SLL","HNI_CUSTOMER")
+demog = demog.withColumnRenamed("INCOME_SLL2" , "HNI_CUSTOMER")
+
+demog = demog.withColumn("INCOME_SLL",ltrim(col("OCCUPATION")))
+demog = demog.withColumn("INCOME_SLL2",rtrim(col("INCOME_SLL")))
+demog = demog.drop("INCOME_SLL","OCCUPATION")
+demog = demog.withColumnRenamed("INCOME_SLL2" , "OCCUPATION")
+
+
+
+
+
+
+Slab_1,Slab_2,Slab_3,Slab_4,Slab_5,Slab_6,Slab_7,Slab_8,Slab_9,Slab_10,HNI_1,HNI_2,HNI_3,Occup_1,Occup_2,Occup_3,Occup_4,Occup_5,Occup_6,Occup_7,Occup_8,Occup_9,Occup_10,Occup_11,Marg_1,Marg_2,GENDER_1,GENDER_2,GENDER_3
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+var fe = spark.read.parquet("/icici/cust_feature_eng/*")
+var um = spark.read.parquet("/OctopusLayout/user_map/*")
+
+var mdp = spark.read.parquet("/persist/habitualExploree/R21_17Aug19/modelDataPrep/*")
+//var sdp = spark.read.parquet("/persist/habitualExploree/R21_17Aug19/mutatedScoreDataPrep/*/*")
+
+var x = fe.join(um, um("MATCH_ACCOUNT") === fe("MATCH_ACCOUNT_1"),"left").drop(um("MATCH_ACCOUNT"))
+x = x.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER","MAIL_CUST_ID")
+
+var r= mdp.join(x, x("user_id") === mdp("user_id"),"inner").drop(x("user_id"))
+//var r= sdp.join(x, x("user_id") === sdp("user_id"),"inner").drop(x("user_id"))
+
+r=r.drop("5001","5002","5003","5004","5005","5006","5007","5008","5009","5010","6001","6002","6003","7001","7002","7003","7004","7005","7006","7007","7008","7009","7010","7011","8001","8002","9001","9002","9003")
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+var y = r.withColumnRenamed("Slab_1","5001") 
+y = y.withColumnRenamed("Slab_2","5002")
+y = y.withColumnRenamed("Slab_3","5003")
+y = y.withColumnRenamed("Slab_4","5004")
+y = y.withColumnRenamed("Slab_5","5005")
+y = y.withColumnRenamed("Slab_6","5006")
+y = y.withColumnRenamed("Slab_7","5007")
+y = y.withColumnRenamed("Slab_8","5008")
+y = y.withColumnRenamed("Slab_9","5009")
+y = y.withColumnRenamed("Slab_10","5010")
+y = y.withColumnRenamed("HNI_1","6001")
+y = y.withColumnRenamed("HNI_2","6002")
+y = y.withColumnRenamed("HNI_3","6003")
+y = y.withColumnRenamed("Occup_1","7001")
+y = y.withColumnRenamed("Occup_2","7002")
+y = y.withColumnRenamed("Occup_3","7003")
+y = y.withColumnRenamed("Occup_4","7004")
+y = y.withColumnRenamed("Occup_5","7005")
+y = y.withColumnRenamed("Occup_6","7006")
+y = y.withColumnRenamed("Occup_7","7007")
+y = y.withColumnRenamed("Occup_8","7008")
+y = y.withColumnRenamed("Occup_9","7009")
+y = y.withColumnRenamed("Occup_10","7010")
+y = y.withColumnRenamed("Occup_11","7011")
+y = y.withColumnRenamed("Marg_1","8001")
+y = y.withColumnRenamed("Marg_2","8002")
+y = y.withColumnRenamed("GENDER_1","9001")
+y = y.withColumnRenamed("GENDER_2","9002")
+y = y.withColumnRenamed("GENDER_3","9003")
+
+//------------------------------------------------------------------------
+/*bullshit
+y = y.withColumn("y_label123",$"y_label"*1)
+y = y.drop("y_label")
+y =y.withColumnRenamed("y_label123","y_label")
+*/
+//------------------------------------------------------------------------
+//MDP:
+y.write.parquet("/persist/habitualExploree/R20_16Aug19/mdp_fnl/")
+# hdfs dfs -rm -r -f /persist/habitualExploree/R20_16Aug19/modelDataPrep
+# hdfs dfs -mkdir /persist/habitualExploree/R20_16Aug19/modelDataPrep
+# hdfs dfs -mv /persist/habitualExploree/R20_16Aug19/mdp_fnl /persist/habitualExploree/R20_16Aug19/modelDataPrep/
+
+//SDP:
+y.write.parquet("/persist/habitualExploree/R20_16Aug19/sdp_fn1")
+# hdfs dfs -rm -r -f /persist/habitualExploree/R20_16Aug19/mutatedScoreDataPrep/
+# hdfs dfs -mv /persist/habitualExploree/R20_16Aug19/sdp_fn1 /persist/habitualExploree/R20_16Aug19/mutatedScoreDataPrep/
+
+//------------------------------------------------------------------------
+Feature Importance
+
+import org.apache.spark.ml.tuning.CrossValidatorModel
+val cv =CrossValidatorModel.load("/persist/habitualExploree/R21_17Aug19/cvModel/")
+import org.apache.spark.ml.PipelineModel
+import org.apache.spark.ml.classification.RandomForestClassificationModel
+val rf = cv.bestModel.asInstanceOf[PipelineModel].stages.last.asInstanceOf[RandomForestClassificationModel]
+rf.featureImportances.toArray.foreach(println)
+
+
+
+
+
+
+ import org.apache.spark.ml.{Pipeline, PipelineModel, PipelineStage}
+
+
+~
+
+
+
+
+
+
+
+val g = spark.read.parquet("/persist/habitualExploree/R18_14Aug19/genData")
+
+val sip_base_users = g.filter(col("event_id") === 62).select("user_id").distinct
+
+val sip_base_txns     = g.join(sip_base_users, Seq("user_id"))
+val non_sip_base_txns = g.join(sip_base_users, Seq("user_id"), "left_anti")
+
+g.select("user_id").distinct.count
+sip_base_txns.select("user_id").distinct.count
+non_sip_base_txns.select("user_id").distinct.count
+
+sip_base_txns.groupBy("event_id").agg(countDistinct("user_id").alias("uniq_users")).show(100, false)
+non_sip_base_txns.groupBy("event_id").agg(countDistinct("user_id").alias("uniq_users")).show(100, false)
+
+//------------------------------------
+val g = spark.read.parquet("/persist/habitualExploree/R18_14Aug19/genData")
+val e1 = Array(1,3,4,5,8,11,12,14,16,24,25,28,29,30,33,34,38,42,43,45,46,48,50,51,52,55,57,58,60,61,62)
+val e2 = Array(1,3,4,5,8,11,12,14,16,24,25,28,29,30,33,34,38,42,43,45,46,48,50,51,52,55,57,58,60,61,62)
+
+case class CM(p1: Int, p2:Int, uniq_users:Int)
+var F = spark.emptyDataset[CM].toDF
+(1 to e1.length -1).foreach(i => {
+	(i to e2.length -1).foreach(j => {
+		println(i, j, e1(i), e2(j))
+		val f1 = g.filter(col("event_id") === e1(i)).select("user_id").distinct
+		val f2 = g.filter(col("event_id") === e2(j)).select("user_id").distinct
+		val u = f1.join(f2, Seq("user_id")).distinct.count
+		val t = Seq(( e1(i), e2(j), u )).toDF("p1", "p2", "uniq_users")
+		F = F.union(t)
+		F.show()
+	})
+})
+
+///New data
+no. of txn in new data = 106757136
+
+no.of total user demog = 5386126
+prev_no.of_txn         = 562334919
+=======================================================================================
+
+
+
+
+
+
+
+

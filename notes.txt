@@ -1,0 +1,1297 @@
+import org.apache.spark.sql.types._
+
+val customSchema = StructType(Array(
+     |         StructField("SEGMENT", StringType, true),
+     |  StructField("MATCH_ACCOUNT", StringType, true),
+     |         StructField("STOCK", StringType, true),
+     |         StructField("EVENT", StringType, true),
+     |         StructField("PRODUCT", StringType, true),
+     |  StructField("ACTION", StringType, true),
+     |  StructField("QUANTITY", DoubleType, true),
+     |  StructField("ORDER_TYPE", StringType, true),
+     |  StructField("ORDER_VALIDITY", StringType, true),
+     |  StructField("LIMIT_PRICE", DoubleType, true),
+     |  StructField("EXCHANGE", StringType, true),
+     |  StructField("EXCHANGE_TIMESTAMP", StringType, true)))
+
+val DemogSchema = StructType(Array(
+     |         StructField("MATCH_ACCOUNT_1", StringType, true),
+     |  StructField("BIRTH_YEAR", StringType, true),
+     |         StructField("GENDER", StringType, true),
+     |         StructField("CITY", StringType, true),
+     |         StructField("PINCODE", StringType, true),
+     |  StructField("STATE", StringType, true),
+     |  StructField("COUNTRY", StringType,true),
+     |  StructField("ACCOUNT_OPEN_DATE", StringType, true),
+     |  StructField("OCCUPATION", StringType, true),
+     |  StructField("INCOME_SLAB", StringType, true),
+     | StructField("MARTIAL_STATUS", StringType, true),
+     |  StructField("TYPE_OF_ACCOUNT", StringType, true),
+     |  StructField("PRIORITY_CUSTOMER", StringType, true),
+     |  StructField("HNI_CUSTOMER", StringType, true),
+     |  StructField("MAIL_CUST_ID", StringType, true)))
+
+var ec = spark.read.format("csv").option("header", "true").load("file:///opt/platform/marketing/*EC*.csv")
+var raw_equity = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/Equity_2/*Equity*.txt")
+var raw_plans = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/Plans_11/*PLANS*.txt")
+var cust     = spark.read.format("csv").schema(DemogSchema).load("file:///opt/octopus/data/inputfiles/CustomerMaster_1/*Revised*.txt")
+///////spark-shell --executor-memory 33G --driver-memory 19G --num-executors 2 --executor-cores 7
+
+var equity_2 = raw_equity.withColumn("txn_metric",$"QUANTITY" * $"LIMIT_PRICE")
+
+equity_2 = equity_2.withColumn("event_name",concat($"SEGMENT",lit("_"),$"PRODUCT", lit("_"),$"EVENT")
+equity_2 = equity_2.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT")
+
+equity_2 = equity_2.drop("SEGMENT","STOCK","EVENT","PRODUCT","ACTION","QUANTITY","ORDER_TYPE","ORDER_VALIDITY","LIMIT_PRICE","EXCHANGE")
+
+txn = txn.withColumn("timestamp",to_timestamp($"EXCHANGE_TIMESTAMP","dd-MMM-yyyy HH:mm:ss"))
+
+txn = txn.withColumn("txn_timestamp",unix_timestamp($"timestamp"))
+
+equity_2 = equity_2.withColumn("txn_time",$"txn_timestamp" * 1000)
+
+equity_2 = equity_2.drop("EXCHANGE_TIMESTAMP","timestamp","txn_timestamp")
+
+//ar event_dict = Seq(("EQUITY_BTST",1),("EQUITY_SPOT",2),("EQUITY_MARGIN",3),("EQUITY_MarginPLUS",4),("EQUITY_eATM",5),("EQUITY_CASH",6),("EQUITY_OFS",7),("EQUITY_DERIVATIVES_Option",8),("EQUITY_DERIVATIVES_Future",9),("EQUITY_DERIVATIVES_FuturePLUS Stop Loss",10),("EQUITY_DERIVATIVES_FuturePLUS",11),("EQUITY_DERIVATIVES_OptionsPLUS",12)).toDF("E_Name", "E_Id")
+var event_dict = Seq((1,"EQUITY_BTST",1),(2,"EQUITY_SPOT",2),(3,"EQUITY_MARGIN",3),(4,"EQUITY_MarginPLUS",4),(5,"EQUITY_eATM",5),(6,"EQUITY_CASH",6),(7,"EQUITY_OFS",7),(8,"EQUITY_DERIVATIVES_Option",8),(9,"EQUITY_DERIVATIVES_Future",9),(10,"EQUITY_DERIVATIVES_FuturePLUS Stop Loss",10),(11,"EQUITY_DERIVATIVES_FuturePLUS",11),(12,"EQUITY_DERIVATIVES_OptionsPLUS",12)).toDF("event_id","event_name","event_id_l1")
+
+var eqt_df = equity_2.join(event_dict,equity_2("event_name") === event_dict("E_Name"),"inner").drop(equity_2("event_name"))
+
+var fno_df = fno_2.join(event_dict ,fno_2("event_name") === event_dict("E_Name"),"inner").drop(fno_2("event_name"))
+
+var eqt_fno_df = eqt_df.union(fno_df)  
+
+++++ eqt_fno_df.write.parquet("/icici/equity_fno/")
+++++ var x = spark.read.parquet("/icici/equity_fno/")
+
++=============+=================+===================+===============+=====
+ 
+EVENT_ATT_SCHEMA
+=================
+Attribut table Schema ::> attr_id|entity_name|data_type|field_name|display_name|displayable
+
+Event_Attribut table Schema ::> event_id|attr_id|attr_value|inserted_at
+
+var event_Schema = StructType(Array(
+     |         StructField("event_id", StringType, true),
+     |  StructField("attr_id", StringType, true),
+     |         StructField("attr_value", StringType, true),
+     |         StructField("inserted_at", StringType, true)))
+
+val ev_attr = spark.read.format("csv").schema(event_Schema ).load("/OctopusLayout/event_attributes.txt")
+
+
+import org.apache.spark.sql.types._
+val attr_Schema = StructType(Array(
+     |         StructField("attr_id", StringType, true),
+     |  StructField("entity_name", StringType, true),
+     |         StructField("data_type", StringType, true),
+     |         StructField("field_name", StringType, true),
+     |         StructField("display_name", StringType, true),
+     |         StructField("displayable", StringType, true)))
+
+val attr = spark.read.format("csv").schema(attr_Schema).load("file:///opt/platform/conf/attributes.txt")
+
+dm= dm.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+
+spark-submit --class triloq.habitual.ai.Controller --master local[*] --executor-memory 33G --driver-memory 19G --num-executors 2 --executor-cores 7 /opt/octopus/data/habitual-spark/target/scala-2.11/exploree-assembly-0.1.jar habitualAI --persist 0 --format parquet --runId R1-15Jun19-s1 --stage genData
+============================================================
+
+
+-------------------------------------------------
+All_Segment_DAtafiles_Loading to a single file::
+-------------------------------------------------
+
+import org.apache.spark.sql.types._
+
+var equity = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/Equity_2/*Equity*.txt")
+var fno = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/EquityDerivatives_3/*FNO*.txt")
+var currency = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/Currency_4/*Currency*.txt")
+var mf = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/MutualFunds_5/*MF*.txt")
+var fd = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/FD_Bonds_6/*FD*.txt")
+var ipo = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/IPO_7/*IPO*.txt")
+var li  = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/Life_Insurance_8/*Life_Insurance*.txt")
+var gi = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/General_Insurance_9/*General_Insurance*.txt")
+var nps = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/NPS_10/*NPS*.txt")
+var plans = spark.read.format("csv").schema(customSchema).load("file:///opt/octopus/data/inputfiles/Plans_11/*PLANS*.txt")
+
+
+var fnlDF = equity.union(fno)
+fnlDF = fnlDF.union(currency)
+fnlDF = fnlDF.union(mf)
+fnlDF = fnlDF.union(fd)
+fnlDF = fnlDF.union(ipo)
+fnlDF = fnlDF.union(li)
+fnlDF = fnlDF.union(gi)
+fnlDF = fnlDF.union(nps)
+fnlDF = fnlDF.union(plans)
+fnlDF.write.parquet("/icici/raw_data/")
+
+fnlDF.filter("SEGMENT = 'SEGMENT'").count
+
+var fnlDF1 = fnlDF.filter("SEGMENT <> 'SEGMENT'")
+
+var fnlDF2 = fnlDF1.withColumn("txn_metric",$"QUANTITY" * $"LIMIT_PRICE")
+
+fnlDF2.write.parquet("/icici/Octopus_inputdata")
+
+
+=========================
+
+----------------------------------------------------------------------------------------
+Unique Id creation (txn_id  for transaction files)::
+----------------------------------------------------------------------------------------
+
+import org.apache.spark.sql.expressions.Window
+1.Create a variable with MonotonicallyIncreasingId //This should be uniq for each row in the txn_data
+2.var w =  Window.orderBy("variable_**Unq")  ///Order by Uniquevalue
+3.var txn = txn.withColumn("variable_**Unq",row_number().over(w))
+
+
+3.var txn = txn.withColumn("txn_id",row_number().over(w))
+
+
+----------------------------------------------------------------------------------------
+Evnet_L1_Id creation (  for Evnent_Attr_files    using Event_Map file)::
+----------------------------------------------------------------------------------------
+1.var w =  Window.orderBy("Event_l1_name")  ///Order by Uniquevalue for each evnt_l1
+
+var dict1 = dict.withColumn
+withColumn   withColumnRenamed
+
+scala> var dict1 = dict.withColumn("event_l1_id",row_number().over(w))   
+
+var f = em.join(dict1,em("event_l1_name") === dict1("event_l1_name"),"inner").drop(dict1("event_l1_name"))
+
+========================================================================================
+
+
+val evet_attr_Schema = StructType(Array(
+     |         StructField("event_id", StringType, true),
+     |  StructField("attr_id", StringType, true),
+     |         StructField("attr_value", StringType, true),
+     |         StructField("inserted_at", StringType, true)));
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+----------------------------------------------------------------------------------------
+Copy a Table from Postgres to Local ::
+----------------------------------------------------------------------------------------
+// Copy the entire table without conditions
+------------------------------------------
+\copy recom_list wto '/opt/octopus/results/recom_list.csv' csv header  
+
+// Copy the entire table with condition
+------------------------------------------
+\###
+\copy (select * from recom_list WHERE run_id = 'R9_02Aug19') TO '/opt/octopus/results/recoms_Aug02.csv' csv header;
+
+
+
+
+----------------------------------------------------------------------------------------
+Converting Output Recomandation Schema to the Desired client specific Schema::
+----------------------------------------------------------------------------------------
+
+// Loading the recoms.csv 
+------------------------------------------
+val recom_list_Schema = StructType(Array(
+     |         StructField("run_id", StringType, true),
+     |  StructField("prediction", StringType, true),
+     |         StructField("rank", StringType, true),
+     |         StructField("event_l1_name", StringType, true),
+     |         StructField("user_id", StringType, true)));
+
+var db_rec = spark.read.format("csv").schema(recom_list_Schema ).load("file:///opt/octopus/results/recom_list.csv")
+var recoms = db_rec.filter("run_id <> 'run_id'")   //REmove the Header
+
+// Map the userId to its MatchAccounts
+------------------------------------------
+var um = spark.read.parquet("/OctopusLayout/user_map/*")
+var recoms_fnl= recoms.join(um,recoms("user_id") === um("user_id"),"inner").drop(um("user_id"))   //Match_Account
+
+
+load the event_map file 
+--------------------------------------
+var em = spark.read.parquet("/OctopusLayout/event_map/*")
+var em2 = em.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+var copy_em = em2
+copy_em = copy_em.drop("EVENT","event_id")
+copy_em = copy_em.dropDuplicates	
+copy_em.count
+
+-----------------------------------------
+joing with "recoms_fnl" based key "event_l1_name"
+-----------------------------------------
+var recs = copy_em.join(recoms_fnl,recoms_fnl("event_l1_name") === copy_em("event_l1_name"),"inner").drop(recoms_fnl("event_l1_name"))
+recs.count // "recoms_fnl.count"  should be equal to "recs.count" 
+
+-----------------------------------------
+Loading the Cust_Demog file to spark to get the Email_Id's
+-----------------------------------------
+var cust_d = spark.read.parquet("/icici/cust_demog1/*")
+cust_d.printSchema
+var cust_d1 =  cust_d.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER")
+var recomnds= recs_temp.join(cust_temp,cust_temp("MATCH_ACCOUNT_1") === recs_temp("MATCH_ACCOUNT"),"inner")
+
+
+Validation::
+-----------------------------------------
+var cust_d2 = cust_d1.withColumnRenamed("MATCH_ACCOUNT_1","MATCH_ACCOUNT")
+
+var s = recs_temp.join(cust_temp,recs_temp("MATCH_ACCOUNT") === cust_temp("MATCH_ACCOUNT_1"), "leftanti")
+var df_fnl = rank1.join(rec,rank1("user_id") === rec("user_id"), "leftanti")
+----------------------------------------------------------
+Write the Final Recomandations file to Hdfs  as a parquet files.
+-------------------------------------------------------------
+recomnds.write.parquet("/OctopusLayout/FinalRecomnadation_ALL*")
+
+ |-- SEGMENT: string  (nullable = true)
+ |-- PRODUCT
+ |-- event_l1_name
+ |-- run_id
+ |-- prediction
+ |-- rank
+ |-- user_id
+ |-- MATCH_ACCOUNT
+
+
+
+// Modify schema for recommendations in one command
+-----------------------------------------
+Seq("SEGMENT","PRODUCT","event_l1_name","run_id","prediction","rank","user_id","MATCH_ACCOUNT"),
+val newName = Seq("TMD_SEGMENT","TMD_PRODUCT","event_l1_name","TMD_RECO_DATE","prediction","rank","user_id","TMD_MATCH_ACCOUNT")
+val icici_recom = recs.toDF(newName:_*)
+
+icici_recom.select()
+
+var em2 = em.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+
+val recoms_mathAcc_schema = StructType(Array(
+     |         StructField("run_id", StringType, true),
+     |         StructField("prediction", StringType, true),
+     |     StructField("rank", StringType, true),
+     |         StructField("event_l1_name", StringType, true),
+     |         StructField("user_id", StringType, true),
+     |         StructField("MATCH_ACCOUNT", StringType, true)))
+
+val  r_csv = spark.read.format("csv").schema(recoms_mathAcc_schema).load("/OctopusLayout/recoms_matchAcc_id.csv")
+
+hdfs dfs -put recom_list.csv /OctopusLayout/recoms_matchAcc_id.csv
+----------------------------------------------
+
+cat obs.csv/part* > Users_Ents.csv
+
+DAte format 
+==== ======
+var df3 = df2.withColumn("Date", (col("EXCHANGE_TIMESTAMP").cast("date")))
+txn = txn.withColumn("dat",$"EXCHANGE_TIMESTAMP".substr(0,12))
+var x = txn.select(to_date($"dat", "dd-MMM-yyyy").alias("date"))
+var df1 = txn.withColumn("id", monotonically_increasing_id())
+var df2 = x.withColumn("id", monotonically_increasing_id())
+var df3 = df2.join(df1, "id", "outer").drop("id")
+
+var f1=df3.filter("SEGMENT == 'CURRENCY_DERIVATIVES' and PRODUCT == 'FUTURES' ")
+
+var f2 = f1.filter(f1("date").gt(lit("2017-04-01")) and f1("date").lt(lit("2018-04-01")))  
+DAteFilters
+data.filter(data("date").gt(lit("2015-03-14")))  
+plans.filter(plans("date").equalTo(lit("2019-07-23"))).show
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+===========================================================================
+Anirudh_3LOQ_Summaries 
+===========================================================================
+txn = txn.withColumn("event_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+txn = txn.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT",lit("_"),$"EVENT"))
+
+
+Stage1: Transaction data summary
+--------------------------------------
+1.for each Transaction code /event type
+
+1.1.1#no.of txns for each product      = 
+1.1.2#no.of txns for each event_name     = 
+1.1.3#no.of txns for each event_l1_name  = 
+
+1.2.1#no.of unq user for each product      = 
+1.2.2#no.of unq user for each event_name     = 
+1.2.3#no.of unq user for each event_l1_name  = 
+
+txn.groupBy("PRODUCT").agg(count("MATCH_ACCOUNT")).show(1000000,false)
+txn.groupBy("event_name").agg(count("MATCH_ACCOUNT")).show(1000000,false)   
+txn.groupBy("event_l1_name").agg(count("MATCH_ACCOUNT")).show(1000000,false)   
+
+txn.groupBy("PRODUCT").agg(countDistinct("MATCH_ACCOUNT")).show(1000000,false)   
+txn.groupBy("event_name").agg(countDistinct("MATCH_ACCOUNT")).show(1000000,false)  
+txn.groupBy("event_l1_name").agg(countDistinct("MATCH_ACCOUNT")).show(1000000,false)
+
+
+
+Stage2: Demographic data summary
+--------------------------------------
+
+var x1 = Demo_cust.count
+var x2 = Demo_cust.select("MATCH_ACCOUNT_1").distinct.count
+var x3 = Demo_cust.groupBy("GENDER").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000000,false)
+var x4 = Demo_cust.groupBy("CITY").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000000,false)
+var x5 = Demo_cust.groupBy("PINCODE").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000000,false)t
+var x6 = Demo_cust.groupBy("STATE").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000000,false)
+var x7 = Demo_cust.groupBy("COUNTRY").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000000,false)
+var x8 = Demo_cust.groupBy("OCCUPATION").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000000,false)
+var x9 = Demo_cust.groupBy("MARTIAL_STATUS").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000000,false)
+var x10 = Demo_cust.groupBy("TYPE_OF_ACCOUNT").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000000,false)
+var x11= Demo_cust.groupBy("HNI_CUSTOMER").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000000,false)
+println("  >> ", x1)
+println("  >> ", x2)
+println("  >> ", x3)
+println("  >> ", x4)
+println("  >> ", x5)
+println("  >> ", x6)
+println("  >> ", x7)
+println("  >> ", x8)
+println("  >> ", x9)
+println("  >> ", x10)
+println("  >> ", x11)
+
+
+x1: Long = 5358915
+x2: Long = 5358915
+x3: Long = 6
+x4: Long = 6038
+x5: Long = 47958
+x6: Long = 811
+x7: Long = 155
+x8: Long = 67
+x9: Long = 2
+x10: Long = 6
+x11: Long = 7
+
+
+Stag3: Raw data summary
+--------------------------------------
+txn1 = txn.withColumn("date",to_timestamp($"EXCHANGE_TIMESTAMP","dd-MMM-yyyy"))
+
+var x1 = txn1.select("event_name").distinct.count
+var x2 =  txn1.select("event_l1_name").distinct.count
+txn1.select("event_name").distinct.show(1000000,false)
+txn1.select("event_l1_name").distinct.show(1000000,false)
+var x3 = txn1.select("MATCH_ACCOUNT").distinct.count
+var x4 = txn1.count
+txn1.groupBy("event_name","date").agg(countDistinct("MATCH_ACCOUNT").count("MATCH_ACCOUNT")).orderBy("event_name").show(1000000,false)
+
+
+println("  >> ", x1)
+println("  >> ", x2)
+println("  >> ", x3)
+println("  >> ", x4)
+
+
+
+Analysis on ScoreDataPrep dataframe
+
+var sdp = spark.read.parquet("/persist/habitualExploree/R9_02Aug19/scoreDataPrep/*")
+
+var x1 = sdp.filter($"1" === '1').count
+var x2 = sdp.filter($"2" === '1').count
+var x3 = sdp.filter($"3" === '1').count
+var x4 = sdp.filter($"4" === '1').count
+var x5 = sdp.filter($"5" === '1').count
+var x6 = sdp.filter($"6" === '1').count
+var x7 = sdp.filter($"7" === '1').count
+var x8 = sdp.filter($"8" === '1').count
+var x9 = sdp.filter($"9" === '1').count
+var x10 = sdp.filter($"10" === '1').count
+var x11= sdp.filter($"11" === '1').count
+var x12 = sdp.filter($"12" === '1').count
+var x13 = sdp.filter($"13" === '1').count
+var x14 = sdp.filter($"14" === '1').count
+var x15 = sdp.filter($"15" === '1').count
+var x16 = sdp.filter($"16" === '1').count
+var x17 = sdp.filter($"17" === '1').count
+var x18 = sdp.filter($"18" === '1').count
+var x19 = sdp.filter($"19" === '1').count
+var x20 = sdp.filter($"20" === '1').count
+var x21= sdp.filter($"21" === '1').count
+var x22 = sdp.filter($"22" === '1').count
+var x23 = sdp.filter($"23" === '1').count
+var x24 = sdp.filter($"24" === '1').count
+var x25 = sdp.filter($"25" === '1').count
+var x26 = sdp.filter($"26" === '1').count
+var x27 = sdp.filter($"27" === '1').count
+var x28 = sdp.filter($"28" === '1').count
+var x29 = sdp.filter($"29" === '1').count
+var x30 = sdp.filter($"30" === '1').count
+var x31= sdp.filter($"31" === '1').count
+var x32 = sdp.filter($"32" === '1').count
+var x33 = sdp.filter($"33" === '1').count
+var x34 = sdp.filter($"34" === '1').count
+var x35 = sdp.filter($"35" === '1').count
+var x36 = sdp.filter($"36" === '1').count
+var x37 = sdp.filter($"37" === '1').count
+var x38 = sdp.filter($"38" === '1').count
+var x39 = sdp.filter($"39" === '1').count
+var x40 = sdp.filter($"40" === '1').count
+var x41 = sdp.filter($"41" === '1').count
+var x42 = sdp.filter($"42" === '1').count
+var x43 = sdp.filter($"43" === '1').count
+var x44 = sdp.filter($"44" === '1').count
+var x45 = sdp.filter($"45" === '1').count
+var x46 = sdp.filter($"46" === '1').count
+var x47 = sdp.filter($"47" === '1').count
+var x48 = sdp.filter($"48" === '1').count
+var x49 = sdp.filter($"49" === '1').count
+var x50 = sdp.filter($"50" === '1').count
+var x51 = sdp.filter($"51" === '1').count
+var x52 = sdp.filter($"52" === '1').count
+var x53 = sdp.filter($"53" === '1').count
+var x54 = sdp.filter($"54" === '1').count
+var x55 = sdp.filter($"55" === '1').count
+var x56 = sdp.filter($"56" === '1').count
+var x57 = sdp.filter($"57" === '1').count
+var x58 = sdp.filter($"58" === '1').count
+var x59 = sdp.filter($"59" === '1').count
+var x60 = sdp.filter($"60" === '1').count
+var x61 = sdp.filter($"61" === '1').count
+var x62 = sdp.filter($"62" === '1').count
+println("  >> ", x1)
+println("  >> ", x2)
+println("  >> ", x3)
+println("  >> ", x4)
+println("  >> ", x5)
+println("  >> ", x6)
+println("  >> ", x7)
+println("  >> ", x8)
+println("  >> ", x9)
+println("  >> ", x10)
+println("  >> ", x11)
+println("  >> ", x12)
+println("  >> ", x13)
+println("  >> ", x14)
+println("  >> ", x15)
+println("  >> ", x16)
+println("  >> ", x17)
+println("  >> ", x18)
+println("  >> ", x19)
+println("  >> ", x20)
+println("  >> ", x21)
+println("  >> ", x22)
+println("  >> ", x23)
+println("  >> ", x24)
+println("  >> ", x25)
+println("  >> ", x26)
+println("  >> ", x27)
+println("  >> ", x28)
+println("  >> ", x29)
+println("  >> ", x30)
+println("  >> ", x31)
+println("  >> ", x32)
+println("  >> ", x33)
+println("  >> ", x34)
+println("  >> ", x35)
+println("  >> ", x36)
+println("  >> ", x37)
+println("  >> ", x38)
+println("  >> ", x39)
+println("  >> ", x40)
+println("  >> ", x41)
+println("  >> ", x42)
+println("  >> ", x43)
+println("  >> ", x44)
+println("  >> ", x45)
+println("  >> ", x46)
+println("  >> ", x47)
+println("  >> ", x48)
+println("  >> ", x49)
+println("  >> ", x50)
+println("  >> ", x51)
+println("  >> ", x52)
+println("  >> ", x53)
+println("  >> ", x54)
+println("  >> ", x55)
+println("  >> ", x56)
+println("  >> ", x57)
+println("  >> ", x58)
+println("  >> ", x59)
+println("  >> ", x60)
+println("  >> ", x61)
+println("  >> ", x62)
+
+
+// count of unique users whose bit is set to 1 for each event_l1_name
+
+Event   #No of Unque users  that have bit set to '1' per each event 
+Event1: 2471
+Event2: 1506
+Event3: 51638
+Event4: 707378
+Event5: 20700
+Event6: 6545
+Event7: 9260
+Event8: 52400
+Event9: 13823
+Event10: 75634
+Event11: 30169
+Event12: 13129
+Event13: 19172
+Event14: 13597
+Event15: 190
+Event16: 15007
+Event17: 949
+Event18: 8
+Event19: 7
+Event20: 0
+Event21: 2
+Event22: 11
+Event23: 68
+Event24: 45
+Event25: 0
+Event26: 42
+Event27: 21690
+Event28: 60
+Event29: 182775
+Event30: 14756
+Event31: 0
+Event32: 456
+Event33: 470
+Event34: 57898
+Event35: 8437
+Event36: 310
+Event37: 210
+Event38: 31
+Event39: 24870
+Event40: 24870
+Event41: 24870
+Event42: 24870
+Event43: 24870
+Event44: 24870
+Event45: 24870
+Event46: 24870
+Event47: 24870
+Event48: 24870
+Event49: 24870
+Event50: 24870
+Event51: 24870
+Event52: 24870
+Event53: 24870
+Event54: 24870
+Event55: 24870
+Event56: 24870
+Event57: 24870
+Event58: 24870
+Event59: 24870
+Event60: 24870
+Event61: 24870
+Event62: 24870
+
+
+
+
+
+Stage9: BitFlip Output
+
+
+select event_l1_name,count(distinct(user_id)) from recom_list where run_id = 'R1_23Jul19' group by event_l1_name;
+
+
+
+
++++++++++++++++++++++++++++++++++++++++++++++
+EDA
+====>
+.select("SEGMENT").distinct.show  
+equity.select("MATCH_ACCOUNT").distinct.count
+equity.select("STOCK").distinct.show
+equity.select("EVENT").distinct.show
+equity.select("PRODUCT").distinct.show
+equity.select("ACTION").distinct.show
+equity.select("QUANTITY").distinct.show
+equity.select("ORDER_TYPE").distinct.show
+equity.select("ORDER_VALIDITY").distinct.show
+equity.select("LIMIT_PRICE").distinct.show
+equity.select("EXCHANGE").distinct.show
+equity.select("EXCHANGE_TIMESTAMP").distinct.show
+
+
+/home/triloq/docker_volume_I/hdfs-storage ## hdfs-site.xml
+/opt/octopus/data/hdfs-data    ## mounted on data folder of thhe server
+
+----
+equity.count ## no. of_trxn in equity
+equity.select("MATCH_ACCOUNT").distinct.count #No of unique users
+equity.groupBy("PRODUCT").agg(count("MATCH_ACCOUNT")).show ## No.of Trnsctns for each product in the segment
+equity.groupBy("PRODUCT").agg(countdist("MATCH_ACCOUNT")).show ## No.of Unique User each product in the segment
+equity_2.groupBy("PRODUCT").agg(max("txn_metric")).show    ## Max Amount for each product in the segment
+equity_2.groupBy("PRODUCT").agg(min("txn_metric")).show    ## Min Amount for each product in the segment
+equity_2.groupBy("PRODUCT").agg(avg("txn_metric")).show    ## Avg Amount for each product in the segment
+equity_2.groupBy("PRODUCT").agg(sum("txn_metric")).show      ## Sum Amount for each product in the segment
+
+equity_2.filter("EVENT == 'TRADE'").agg(sum("txn_metric")).show(truncate=false)
+equity_2.filter("EVENT <> 'TRADE'").agg(sum("txn_metric")).show(truncate=false)
+
+equity_2.filter("EVENT == 'TRADE'").count
+equity_2.filter("EVENT <> 'TRADE'").count
+
+equity_2.filter("EVENT == 'TRADE'").groupBy("PRODUCT").agg(sum("txn_metric")).show(truncate=false)
+equity_2.filter("EVENT <> 'TRADE'").groupBy("PRODUCT").agg(sum("txn_metric")).show(truncate=false)
+
+
+
+
+
+## Required column [user_id, txn_timestamp, txn_metric, event_id]
+## cmd var currency = spark.read.parquet("/icici/currency")
+
+
+
+
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Automate Evnet_Attribute File
+==============================
+
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.IntegerType
+
+def melt(df:DataFrame , id_vars:Seq[String]):
+DataFrame ={
+val value_vars:Seq[String] = df.columns diff id_vars 
+val var_name = "attr_name"
+val value_name = "attr_value"
+val _vars_and_vals = array((for(c <- value_vars) yield{struct(lit(c).alias(var_name),col(c).alias(value_name))}):_*)
+val _tmp = df.withColumn("_vars_and_vals",explode(_vars_and_vals))
+val cols = id_vars.map(col _) ++ {for( x <- List(var_name,value_name)) yield{col("_vars_and_vals")(x).alias(x)}}
+return _tmp.select(cols:_*)
+}
+
+var em = spark.read.parquet("/OctopusLayout/event_map/*")
+
+var aa = spark.read.parquet("/OctopusLayout/attributes/*")
+
+new_hab = new_hab.withColumn("crdrind",trim(col("crdrind"))).withColumn("channel",trim(col("channel"))).withColumn("method",trim(col("method"))).withColumn("category",trim(col("category"))).withColumns("subcategory",trim(col("subcategory"))).withColumn("event_id",trim(col("event_id"))).withColumn("event_l1_id",trim(col("event_l1_id")))
+var new_hab_meta = melt(new_hab,Seq("event_l1_id"))
+
+var final_meta = new_hab_meta.join(attr,attr.col("field_name") === new_hab_meta.col("attr_name"))
+final_meta.select("event_id","attr_name","attr_value","attr_id").write.mode("overwrite").parquet("/OctopusLayout/event_attribute/")
+
+
+
+
+}
+
+
+================================================================================================================================================
+
+Automation to create the EventAttributeFile
+--------------------------------------------
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.sql.expressions.Window
+
+var em = spark.read.parquet("/OctopusLayout_v2/event_map/*")
+
+em = em.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+var test = em.select("event_l1_name").distinct
+test =test.withColumn("Unq",monotonically_increasing_id())
+var w =  Window.orderBy("Unq")
+var dict1 = test.withColumn("event_l1_id",row_number().over(w))
+var f = em.join(dict1,em("event_l1_name") === dict1("event_l1_name"),"inner").drop(dict1("event_l1_name"))
+f=f.drop("Unq")
+f = f.withColumn("event_l1_id_new",concat($"event_l1_id",lit("")))
+
+
+def toLong(df: DataFrame, by: Seq[String]): DataFrame = {
+        val (cols, types) = df.dtypes.filter{ case (c, _) => !by.contains(c)}.unzip
+        require(types.distinct.size == 1, s"${types.distinct.toString}.length != 1")
+     
+        val kvs = explode(array(
+          cols.map(c => struct(lit(c).alias("key"), col(c).alias("val"))): _*
+        ))
+     
+        val byExprs = by.map(col(_))
+     
+        df
+          .select(byExprs :+ kvs.alias("_kvs"): _*)
+          .select(byExprs ++ Seq($"_kvs.key", $"_kvs.val"): _*)
+      }
+
+var a = f.select("SEGMENT","PRODUCT","event_id")
+var b = f.select("event_l1_name","event_l1_id_new","event_id")
+var c = f.select("EVENT","event_id")
+
+
+var p = toLong(a,Seq("event_id"))
+var q = toLong(b,Seq("event_id"))
+var o  = toLong(c,Seq("event_id"))
+
+
+var r = p.union(q)
+r = r.union(o)
+
+r.count
+
+var event_dict = Seq((15,"SEGMENT"),(16,"PRODUCT"),(17,"EVENT"),(19,"event_l1_id_new"),(20,"event_l1_name")).toDF("attr_id", "event_l1_id_new")
+
+var j = r.join(event_dict ,r("key") === event_dict("event_l1_id_new"),"inner").drop(event_dict("event_l1_id_new"))
+j= j.withColumnRenamed("val","attr_value")
+
+j.show
+j.count
+j.select("attr_id").distinct.show(10000,false)
+j.select("event_id").distinct.show(10000,false)
+var j2 =j.withColumn("Unq",monotonically_increasing_id())
+var w1 =  Window.orderBy("Unq")
+var event_attr = j2.withColumn("inserted_at",row_number().over(w1))
+var event_attribute_file =event_attr.drop("Unq")
+event_attribute_file = event_attribute_file.drop("key")
+
+
+////var t = txn.withColumn("txn_id", monotonicallyIncreasingId)
+
+/// Data_Analysis why dataprepsummary having flowing zeros
+
+=============================================================================================
+
+var df3 = spark.read.parquet("/icici/complete_txn_v2/")
+
+df3 = df3.withColumn("event_name",concat($"SEGMENT",lit("_"),$"PRODUCT",lit("_"),$"EVENT"))
+
+df3 = df3.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+
+
+
+var df3 = df2.join(df1, Seq("id"), "outer").drop("id")
+txn.groupBy("PRODUCT").agg(count("MATCH_ACCOUNT")).show(1000000,false)
+
+
+
+var tr_data = df3.filter(df3("date").gt(lit("2017-03-31")) and df3("date").lt(lit("2018-04-01")))
+var six_data = df3.filter(df3("date").gt(lit("2017-09-30")) and df3("date").lt(lit("2018-04-01")))
+
+var tr_usrs_txn = tr_data.groupBy("event_l1_name").agg(count("MATCH_ACCOUNT"))
+var six_usrs_txn = six_data.groupBy("event_l1_name").agg(count("MATCH_ACCOUNT"))
+
+
+var tr_usrs_cnt = tr_data.groupBy("event_l1_name").agg(countDistinct("MATCH_ACCOUNT"))
+var six_usrs_cnt = six_data.groupBy("event_l1_name").agg(countDistinct("MATCH_ACCOUNT"))
+
+var usrs_e8 = tr_data.filter("event_l1_name = 'CURRENCY_DERIVATIVES_OPTIONS'")
+var usrs_e31 = tr_data.filter("event_l1_name = 'EQUITY_eATM'")
+var usrs_e3 = tr_data.filter("event_l1_name = 'GENERAL_INSURANCE_Health Insurance:I-Lombard Personal Protect'")
+var usrs_e19 = tr_data.filter("event_l1_name = 'GENERAL_INSURANCE_Motor Insurance:I-Lombard Private Car'")
+
+
+usrs_e8.select("MATCH_ACCOUNT").distinct.show(10000,false)
+usrs_e31.select("MATCH_ACCOUNT").distinct.show(10000,false)
+usrs_e3.select("MATCH_ACCOUNT").distinct.show(10000,false)
+usrs_e19.select("MATCH_ACCOUNT").distinct.show(10000,false)
+
+tr_usrs_txn.show(10000,false)
+six_usrs_txn.show(10000,false)
+
+tr_usrs_cnt.show(10000,false)
+six_usrs_cnt.show(10000,false)
+
+
+
+
+
+
+
+===================================================================================================
+## Raw data ###
+var final_data= spark.read.parquet("/icici/complete_txn_v2/*")
+final_data = final_data.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+final_data = final_data.withColumn("dat",$"EXCHANGE_TIMESTAMP".substr(0,12))
+var x = final_data.select(to_date($"dat", "dd-MMM-yyyy").alias("date"))
+final_data = final_data.withColumn("id", monotonically_increasing_id())
+x = x.withColumn("id", monotonically_increasing_id())
+var df3 = x.join(final_data, Seq("id"), "outer").drop("id")
+df3=df3.drop("dat")
+df3 = df3.withColumn("year", substring($"date",0,4))
+df3 = df3.withColumn("mon", substring($"EXCHANGE_TIMESTAMP",4,3))
+df3.groupBy("event_l1_name","Year","mon").agg(count("MATCH_ACCOUNT")).show(100000, false)
+df3.groupBy("event_l1_name","Year","mon").agg(countDistinct("MATCH_ACCOUNT")).show(1000000, false)
+## Txn distribution accross L1_name
+## Txn distribution L1_name
+Demog Summaries
+========================
+MATCH_ACCOUNT_1
+BIRTH_YEAR
+GENDER
+CITY
+PINCODE
+STATE
+COUNTRY
+ACCOUNT_OPEN_DATE
+OCCUPATION
+INCOME_SLAB
+MARTIAL_STATUS
+TYPE_OF_ACCOUNT
+PRIORITY_CUSTOMER
+HNI_CUSTOMER
+MAIL_CUST_ID
+
+## Analysis for Cust demog file #####
+
+cust.groupBy("GENDER").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("CITY").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.select("PINCODE").distinct.count
+cust.select("STATE").distinct.count
+cust.groupBy("COUNTRY").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("OCCUPATION").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("MARTIAL_STATUS").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("TYPE_OF_ACCOUNT").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("HNI_CUSTOMER").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("INCOME_SLAB").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("INCOME_SLAB").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+
+
+cust.groupBy("GENDER").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("CITY").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+
+cust.select("CITY").distinct.count
+cust.groupBy("CITY").agg(countDistinct("MATCH_ACCOUNT")).orderBy(desc("count(DISTINCT MATCH_ACCOUNT)")).show(1000,false)
+
+cust.select("PINCODE").distinct.count
+cust.groupBy("PINCODE").agg(countDistinct("MATCH_ACCOUNT")).orderBy(desc("count(DISTINCT MATCH_ACCOUNT)")).show(1000,false)
+
+
+
+cust.groupBy("OCCUPATION").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("MARTIAL_STATUS").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("GENDER").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("HNI_CUSTOMER").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+cust.groupBy("INCOME_SLAB").agg(countDistinct("MATCH_ACCOUNT_1")).show(1000,false)
+
+
+====================
+recoms.groupBy("rank","event_l1").agg(count("user_id"))
+select * from recom_list where run_id = '
+====================================================================================
+select rank,event_l1_name,count("user_id") from recom_list where run_id = 'R21_17Aug19' group By("rank","event_l1_name");
+select rank,count("event_l1_name") from recom_list where run_id = 'R21_17Aug19' group By("rank"); 
+select event_l1_name,count(distinct("user_id")) from recom_list where run_id = 'R21_17Aug19' and rank = '1' group By("event_l1_name") ;
+
+//---------------------------------------------------------------------------
+Transpose event_deatils to event_attributes...** creating event attribute file(saurav)**
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.sql.expressions.Window
+var a = spark.read.parquet("/OctopusLayout_v2/attributes/*")
+var e = spark.read.parquet("/OctopusLayout_v2/event_map/*")
+
+var x =e.select("SEGMENT", "PRODUCT").distinct.write.csv("/tmp/l1events.csv")
+//add counter column to /tmp/l1events.csv as ea_v2. // TO-DO in Excel create an column event l1_id and save
+//code to add id
+var w1 =  Window.orderBy("event_l1_id")
+x  = x.withColumn("event_l1_id",row_number().over(w1))
+var el1 = spark.read.option("header", "true").csv("/tmp/ea_v2")// schema is SEG,PROD,L1_id
+
+
+
+
+e = e.join(el1, Seq("SEGMENT", "PRODUCT"))
+e = e.withColumn("event_name", concat(col("SEGMENT"), lit("_"))).withColumn("event_name", concat(col("event_name"), col("PRODUCT")))
+e = e.withColumnRenamed("event_id_l1", "event_l1_id").withColumnRenamed("event_name", "event_l1_name")
+
+e = e.select(col("event_id"), posexplode(array(pivot_cols:_*)))//pivot_cols= Array("SEG..","PRO","EVENT","l1_nme","l1_id")
+
+e = e.withColumnRenamed("pos", "attr_id").withColumnRenamed("col", "attr_value").withColumn("inserted_at", lit(999))
+
+e = e.withColumn("attr_id", when(col("attr_id") === 0, 15).otherwise(when(col("attr_id") === 1, 16).otherwise(when(col("attr_id") === 2, 17).otherwise(when(col("attr_id") === 3, 19).otherwise(when(col("attr_id") === 4, 20))))))
+
+e.write.parquet("/OctopusLayout_v2/event_attributes")
+//-------------------------------------------------------------------------------------
+
+=================================================================================================================
+Dump recommendations to csv
+
+COPY ( SELECT user_id, event_l1_name, rank  FROM recom_list where run_id = 'R21_17Aug19')   TO '/tmp/trimming_input_all.csv' CSV HEADER;
+
+
+source ./bin/activate python3 from ananconda 
+
+var recom1 =  spark.read.format("csv").option("header", "true").load("file:///opt/octopus/data/recommendations_rank1_try.csv")
+recom1.select("recommended_event","recommendation_level","user_id").groupBy("recommended_event","recommendation_level").agg(count("user_id")).orderBy("recommendation_level").show(10000, false)
+
+================================================================================================================
+
+var sdp = spark.read.parquet("/persist/habitualExploree/R21_17Aug19/scoreDataPrep/*")
+
+sdp:1070734
+
+test_data.groupBy("event_l1_name").agg(count("MATCH_ACCOUNT")).show(10000, false) 
+test_data.groupBy("event_l1_name").agg(countDistinct("MATCH_ACCOUNT")).show(10000, false)
+
+
+====================================================================================
+//Steps to hand-over recommendation
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//load trimmed output csv 
+var recom1 =  spark.read.format("csv").option("header", "true").load("file:///opt/octopus/data/recommendations_rank1_try.csv")
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var j1 = recom1.join(um, um("user_id") === recom1("user_id"), "left").drop(um("user_id"))
+var cust = spark.read.parquet("/icici/Raw_demog_v2/")
+var j2 = j1.join(cust, cust("MATCH_ACCOUNT_1") === j1("MATCH_ACCOUNT"), "left").drop(cust("MATCH_ACCOUNT_1"))
+
+var j2 = df_fnl_c.join(cust, cust("MATCH_ACCOUNT_1") === df_fnl_c("MATCH_ACCOUNT"), "left").drop(cust("MATCH_ACCOUNT_1"))
+
+
+j2 =j2.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER","user_id")
+var e = spark.read.parquet("/OctopusLayout_v2/event_map/*")
+var c = e.select("SEGMENT","PRODUCT").distinct
+c = c.withColumn("recommended_event",concat($"SEGMENT", lit("_"), $"PRODUCT"))
+var j3 = j2.join(c , c("recommended_event") ===j2("recommended_event"),"left").drop(c("recommended_event"))
+============
+//filtering product and rank 1 recommedations
+r = j3.filter("recommended_event = 'EQUITY_BTST' AND recommendation_level = '1'")
+r.coalesce(1).write.mode("overwrite").format("csv").option("header", "true").save("file:///tmp/product_name.csv")
+rec.coalesce(1).write.mode("overwrite").format("csv").option("header", "true").save("file:///opt/platform/control_base.csv")
+cat control_base.csv/* > cntrl_base.csv
+====================================================================================
+ed2.coalesce(1).write.mode("overwrite").format("csv").option("header", "true").save("file:///opt/platform/marketing/equity_derivative.csv")
+
+cat equity_derivative.csv/* > Equity_Derivative.csv
+
+rec.coalesce(1).write.mode("overwrite").format("csv").option("header", "true").save("file:///opt/platform/control_base.csv")
+cat control_base.csv/* > cntrl_base.csv
+
+====================================================================================
+
+import java.util.Calendar
+val cal = Calendar.getInstance
+val df = Seq((cal.get(Calendar.YEAR ), cal.get(Calendar.MONTH )+1, cal.get(Calendar.DATE ))).toDF("year","month","day")
+
+df2 = df2.withColumn("today", unix_timestamp(current_date)) **
+========================================================================================
+ 
+===========================================================================================================
+3Loq Marketing Analysis
+---------------------------------
+1. // Read rank1 recommendations
+var recom1 =  spark.read.format("csv").option("header", "true").load("file:///opt/octopus/data/recommendations_rank1_try.csv")
+var rank1 = recom.filter("recommendation_level = '1'")
+var um = spark.read.parquet("/OctopusLayout_v2/user_map/*")
+var cust = spark.read.parquet("/icici/Raw_demog_v2/*")
+
+cust = cust.withColumn("dat",$"BIRTH_YEAR".substr(0,4))
+import org.apache.spark.sql.types.IntegerType
+var df2 = cust.withColumn("yearTmp",cust.col("dat").cast(IntegerType))
+df2 = df2.withColumn("AGE", $"yearTmp"- 2019)
+df2 = df2.withColumn("AGE_1",$"AGE"*(-1))
+df2 = df2.drop("AGE")
+df2=df2.withColumnRenamed("AGE_1", "AGE")
+df2 = df2.drop("dat","yearTmp")
+
+df2 = df2.withColumn("timestamp",to_timestamp($"ACCOUNT_OPEN_DATE","dd-MMM-yyyy"))
+df2 = df2.withColumn("acc_timestamp",unix_timestamp($"timestamp"))
+df2 = df2.withColumn("today", unix_timestamp(current_date))
+df2 = df2.withColumn("Vin_sec", (($"today" - $"acc_timestamp") /60 /60 /24 /365)) //exact vintage
+df2 = df2.withColumn("VINTAGE", round(col("Vin_sec")* 100 / 5) * 5 / 100) // round-off
+
+var user = rank1.select("user_id").filter("recommended_event ='EQUITY_BTST'") // select event from recom
+var match_acc = user.join(um, um("user_id") === user("user_id"), "inner").drop(um("user_id"))
+//var match_acc = ed.join(um, um("user_id") === ed("user_id"), "inner").drop(um("user_id"))
+var prod_demog = match_acc.join(df2, df2("MATCH_ACCOUNT_1") === match_acc("MATCH_ACCOUNT"),"left").drop(match_acc("MATCH_ACCOUNT"))
+
+==========TXN_RELATED ANALYSIS===========
+//load txn_complete_v2
+var txn = spark.read.parquet("/icici/complete_txn_v2/")
+txn = txn.withColumn("date", $"EXCHANGE_TIMESTAMP".substr(0,11))
+txn = txn.withColumn("hour", $"EXCHANGE_TIMESTAMP".substr(13,2)) 
+
+txn = txn.withColumn("timestamp",to_timestamp($"date","dd-MMM-yyyy"))
+txn = txn.withColumn("txn_timestamp",unix_timestamp($"timestamp"))
+txn = txn.withColumn("modified_time", $"timestamp".substr(0,10))
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+txn =txn.withColumn("dayofweek", date_format(to_date($"modified_time", "yyyy-mm-dd"), "EEE"))
+txn.drop("timestamp","txn_timestamp")
+txn = txn.withColumn("day_time",concat($"dayofweek",lit("_"),$"hour"))
+txn = txn.withColumn("event_l1_name",concat($"SEGMENT",lit("_"),$"PRODUCT"))
+var txn1 = txn.filter("SEGMENT<>'PLANS'")
+
+txn1.groupBy("event_l1_name","day_time").agg(count("MATCH_ACCOUNT")).orderBy("event_l1_name").show(10000000, false)
+txn1.groupBy("event_l1_name","day_time").agg(countDistinct("MATCH_ACCOUNT")).orderBy("event_l1_name").show(10000000, false)
+
+
+===================///Date filter///===================
+var txn = spark.read.parquet("/icici/complete_txn_v2/")
+txn = txn.withColumn("Date", (col("EXCHANGE_TIMESTAMP").cast("date")))
+txn = txn.withColumn("dat",$"EXCHANGE_TIMESTAMP".substr(0,12))
+txn = txn.withColumn("date",to_date($"dat", "dd-MMM-yyyy"))
+var txn1 = txn.filter(txn("date").gt(lit("2018-11-01")) and txn("date").lt(lit("2019-08-16")))
+
+var txn2 = txn.filter(txn("date").geq(lit("2018-11-01")) and txn("date").leq(lit("2019-08-15")))
+""" Commented code date filter do not work properly """
+//var txn3 = txn.filter(to_date(txn("dat")).gt(lit("2018-11-01")) and txn("dat").lt(lit("2019-08-16")))
+//var txn4 = txn.filter(to_date(txn("dat")).geq(lit("2018-11-01")) and txn("dat").leq(lit("2019-08-16")))
+
+var x1 = txn1.filter("date == '2018-11-01'").count
+var x2 = txn1.filter("date == '2019-08-16'").count
+var x3 = txn1.filter("date == '2019-08-15'").count
+var x4 = txn1.filter("date == '2018-11-02'").count
+var x5 = txn2.filter("date == '2018-11-01'").count
+var x6 = txn2.filter("date == '2019-08-16'").count
+var x7 = txn2.filter("date == '2019-08-15'").count
+var x8 = txn2.filter("date == '2018-11-02'").count
+//var x9 = txn3.filter("dat == '2018-11-01'").count
+//var x10 = txn3.filter("dat == '2019-08-16'").count
+//var x11 = txn3.filter("dat == '2019-08-15'").count
+//var x12 = txn3.filter("dat == '2018-11-02'").count
+//var x13 = txn4.filter("dat == '2018-11-01'").count
+//var x14 = txn4.filter("dat == '2019-08-16'").count
+//var x15 = txn4.filter("dat == '2019-08-15'").count
+//var x16 = txn4.filter("dat == '2018-11-02'").count
+
+
+println("  >> ", x1)
+println("  >> ", x2)
+println("  >> ", x3)
+println("  >> ", x4)
+println("  >> ", x5)
+println("  >> ", x6)
+println("  >> ", x7)
+println("  >> ", x8)
+println("  >> ", x9)
+println("  >> ", x10)
+println("  >> ", x11)
+println("  >> ", x12)
+println("  >> ", x13)
+println("  >> ", x14)
+println("  >> ", x15)
+println("  >> ", x16)
+
+testStart = "2018-11-01"
+testEnd="2019-08-16"
+
+
+--------------------------------------------------
+Postogres
+--------------------------------------------------
+
+
+exp_summary=# select distinct(run_id || exp_stage_name) from experiment where run_id = 'R21_17Aug19';
+         ?column?
+--------------------------
+ R21_17Aug19genData
+ R21_17Aug19modelDataPrep
+ R21_17Aug19postAnalysis
+ R21_17Aug19runModel
+ R21_17Aug19runRecomms
+ R21_17Aug19runScore
+ R21_17Aug19scoreDataPrep
+(7 rows)
+
+exp_summary=# select distinct(run_id || exp_stage_name) from experiment where run_id = 'R21_17Aug19' and exp_stage_name = 'scoreDataPrep';
+         ?column?
+--------------------------
+ R21_17Aug19scoreDataPrep
+(1 row)
+
+exp_summary=# update experiment set  run_id = 'R21_17Aug19_Fri_Till_Aug16' where run_id = 'R21_17Aug19' and exp_stage_name = 'scoreDataPrep';
+UPDATE 1
+exp_summary=# select distinct(run_id || exp_stage_name) from experiment where run_id = 'R21_17Aug19';
+         ?column?
+--------------------------
+ R21_17Aug19genData
+ R21_17Aug19modelDataPrep
+ R21_17Aug19postAnalysis
+ R21_17Aug19runModel
+ R21_17Aug19runRecomms
+ R21_17Aug19runScore
+(6 rows)
+
+exp_summary=# update experiment set  run_id = 'R21_17Aug19_Fri_Till_Aug16' where run_id = 'R21_17Aug19' and exp_stage_name = 'runScore';
+UPDATE 1
+
+
+exp_summary=# select distinct(run_id || exp_stage_name) from experiment where run_id = 'R21_17Aug19';                             ?column?
+--------------------------
+ R21_17Aug19genData
+ R21_17Aug19modelDataPrep
+ R21_17Aug19postAnalysis
+ R21_17Aug19runModel
+ R21_17Aug19runRecomms
+(5 rows)
+
+exp_summary=# update experiment set  run_id = 'R21_17Aug19_Fri_Till_Aug16' where run_id = 'R21_17Aug19' and exp_stage_name = 'runRecomms';
+UPDATE 1
+exp_summary=# select distinct(run_id || exp_stage_name) from experiment where run_id = 'R21_17Aug19';                             ?column?
+--------------------------
+ R21_17Aug19genData
+ R21_17Aug19modelDataPrep
+ R21_17Aug19postAnalysis
+ R21_17Aug19runModel
+(4 rows)
+
+exp_summary=# update experiment set  run_id = 'R21_17Aug19_Fri_Till_Aug16' where run_id = 'R21_17Aug19' and exp_stage_name = 'postAnalysis';
+UPDATE 1
+exp_summary=# select distinct(run_id || exp_stage_name) from experiment where run_id = 'R21_17Aug19';         
+
+
+
+
+ rank1.select("event_l1_name").distinct.show(1000,false)
++------------------------------+
+|event_l1_name                 |
++------------------------------+
+|FD_BONDS_FIXED DEPOSITS       |66
+|EQUITY_MARGIN                 |21-25
+|EQUITY_CASH                   |16- 20
+|EQUITY_DERIVATIVES_OptionsPLUS|61,62,63,64
+|MF_SIP                        |86
++------------------------------+
+
+===============Triming========================
+var ed = rank1.filter("event_l1_name == 'EQUITY_DERIVATIVES_OptionsPLUS'")
+var fd = rank1.filter("event_l1_name == 'FD_BONDS_FIXED DEPOSITS'")
+var ec = rank1.filter("event_l1_name == 'EQUITY_CASH'")
+var em = rank1.filter("event_l1_name == 'EQUITY_MARGIN'")
+var ms = rank1.filter("event_l1_name == 'MF_SIP'")
+
+var ed1 = ed.orderBy(desc("prediction")).limit(50000)
+var em1 = em.orderBy(desc("prediction")).limit(50000)
+var fnl = ec.union(fd)
+fnl  = fnl.union(ms)
+fnl  = fnl.union(ed1)
+fnl  = fnl.union(em1)
+fnl.groupBy("event_l1_name").agg(count("user_id")).show(10000,false)
+fnl.coalesce(1).write.mode("overwrite").format("csv").option("header", "true").save("file:///opt/platform/Fnl_Hbtl_Recs.csv")
+cat Fnl_Hbtl_Recs.csv/* > Fnl_Hbtl_Recs_File.csv
+=======================================================================
+
+==============Pick controlBASE=======================
+var recs = spark.read.format("csv").option("header", "true").load("file:///opt/platform/*Fnl_Hbtl_Recs_File*.csv")
+import org.apache.spark.sql.functions.rand
+var base =recs.orderBy(rand()).limit(10000)
+var clnt = recs.except(base)
+===========================================================
+//clnt ****** To handover client *************
+==================================================
+base.groupBy("event_l1_name").agg(count("user_id")).show(10000,false)
+rank1.groupBy("event_l1_name").agg(count("user_id")).show(10000,false)
+
+clnt.coalesce(1).write.mode("overwrite").format("csv").option("header", "true").save("file:///opt/platform/marketing/client.csv")
+cat client.csv/* > client_fnl_file.csv
+
+
+var ed = spark.read.format("csv").option("header", "true").load("file:///opt/platform/marketing/*Equity_Derivative*.csv")
+var ec = spark.read.format("csv").option("header", "true").load("file:///opt/platform/marketing/*EC*.csv")
+var fc = spark.read.format("csv").option("header", "true").load("file:///opt/platform/marketing/*FD*.csv")
+var em = spark.read.format("csv").option("header", "true").load("file:///opt/platform/marketing/*Equity_Margin*.csv")
+var ms = spark.read.format("csv").option("header", "true").load("file:///opt/platform/marketing/*MS*.csv")
+var fd = spark.read.format("csv").option("header", "true").load("file:///opt/platform/marketing/*FD*.csv")
+
+
+var el_map = spark.read.format("csv").option("header", "true").load("/OctopusLayout_v2/eventL1Map.csv")
+
+
+ var gen = spark.read.parquet("/persist/habitualExploree/R21_17Aug19/genDat/*")
+txn =  txn.drop("STOCK","EVENT","ACTION","QUANTITY","ORDER_TYPE","ORDER_VALIDITY","LIMIT_PRICE")
+txn = txn.join(um,txn("user_id") === um("user_id"),"inner").drop(um("user_id")) 
+
+txn = txn.withColumn("date", $"EXCHANGE_TIMESTAMP".substr(0,11))****************
+txn = txn.withColumn("dat",to_date($"date", "dd-MMM-yyyy"))********************************
+txn = txn.filter(txn("dat").gt(lit("2018-11-01")) and txn("date").lt(lit("2019-08-16")))
+
+var el_map = spark.read.format("csv").option("header", "true").load("/OctopusLayout_v2/eventL1Map.csv")
+ j.write.parquet("/icici/Fnl_testData_clinet")
+
+var x = spark.read.parquet("/icici/Fnl_testData_clinet")
+var match_acc = user.join(um, um("user_id") === user("user_id"), "inner").drop(um("user_id"))
+var f_recs = c.join(b, c("user_id") === b("user_id"), "inner").drop(b("user_id"))
+
+
+
+var j = fnl2.withColumn("norm",lit(1)).groupBy("user_id").pivot("SEGMENT").agg(first("norm")).na.fill(0)
+#var j = .join(el_map,gen("event_id") === el_map("event_id_l1"),"inner")
+#var j2 = j.select("user_id","SEGMENT")
+#var j3 = j2.dropDuplicates
+#var j4 = j3.withColumn("norm",lit(1)).groupBy("user_id").pivot("SEGMENT").agg(first("norm")).na.fill(0)
+#el_map.filter($"event_id_l1" isin ("35","23","3","18")).distinct.show(1000,false)
+#gen.filter("user_id == '1202626'").select("user_id","event_id").distinct.show(10000,false)
+==================================================================================================
+==================================================================================================
+==================================================================================================
+CAMPAIGN DATA
+var click = spark.read.format("csv").option("header", "true").load("file:///opt/octopus/data/Campaign_data_20190930/EMail_Click_Logs_20190930.csv")
+var open = spark.read.format("csv").option("header", "true").load("file:///opt/octopus/data/Campaign_data_20190930/Akshay_Mail_Log_Open_20190930.csv")
+
+click = click.drop("ACTION")
+click=click.withColumnRenamed("TRIM(IDCM.SUBJECT_LINE)","SUBJECT_LINE")
+click=click.withColumn("ACTION",lit("click"))
+open= open.withColumn("ACTION",lit("open"))
+f.write.parquet("/campaign/campaign_data")
+var z = spark.read.parquet("/campaign/campaign_data/*")
+
+
+================================code for required fields==============
+var camp=spark.read.parquet("/campaign/campaign_data/*")
+var demog = spark.read.parquet("/icici/Raw_demog_v2/*")
+import org.apache.spark.sql.types._
+val CampSchema = StructType(Array(
+     |         StructField("ACTION", StringType, true),
+     |  StructField("MAILER_CODE", StringType, true),
+     |         StructField("START_DATE", StringType, true),
+     |         StructField("SUBJECT_LINE", StringType, true),
+     |         StructField("MAILER_TYPE",StringType, true),
+     |         StructField("MTCH_ACC", StringType, true),
+     |  StructField("RE_DT", StringType, true),
+     |  StructField("OS_NAME", StringType, true),
+     |  StructField("DEVICE_TYPE", StringType,true),
+     |  StructField("MANUFACTURER", StringType, true),
+     | StructField("BROWSER_NAME", StringType, true),
+     |  StructField("BROWSER_TYPE", StringType, true),
+     |  StructField("BROWSER_MANUFACTURER", StringType, true),
+     |  StructField("IP_ADDRESS", StringType, true),
+     |  StructField("BROWSER", StringType, true),
+     |  StructField("MOBILE_NAME", StringType, true),
+     |  StructField("USER_AGENT", StringType, true)))
+
+var open = spark.read.format("csv").schema(CampSchema).option("delimiter","|").load("file:///opt/octopus/data/Campaign_data_20190930/open_Logs.txt")
+==============Reading a PSV ==========
+var open = spark.read.format("com.databricks.spark.csv").option("header", "true").option("inferSchema","true").option("delimiter","|").load("file:///opt/octopus/data/Campaign_data_20190930/Akshay_Mail_Log_Open_20191003.csv")
+==============================
+// create a join to get match id
+
+var camp=spark.read.parquet("/campaign/campaign_data/*")
+//trim
+camp= camp.withColumn("SUBJECT_LINE", trim($"SUBJECT_LINE"))
+camp= camp.withColumn("RE_DT", trim($"RE_DT"))
+camp= camp.withColumn("START_DATE", trim($"START_DATE"))
+camp= camp.withColumn("MAILER_TYPE", trim($"MAILER_TYPE"))
+camp= camp.withColumn("ACTION", trim($"ACTION"))
+camp= camp.withColumn("MTCH_ACC", trim($"MTCH_ACC"))
+
+var demog = spark.read.parquet("/icici/Raw_demog_v2/*")
+demog = demog.withColumn("MAIL_CUST_ID", trim($"MAIL_CUST_ID"))
+demog = demog.withColumn("MATCH_ACCOUNT_1", trim($"MATCH_ACCOUNT_1"))
+demog = demog.drop("BIRTH_YEAR","GENDER","CITY","PINCODE","STATE","COUNTRY","ACCOUNT_OPEN_DATE","OCCUPATION","INCOME_SLAB","MARTIAL_STATUS","TYPE_OF_ACCOUNT","PRIORITY_CUSTOMER","HNI_CUSTOMER")
+demog = demog.withColumnRenamed("MATCH_ACCOUNT_1","MATCH_ACCOUNT")
+var cam = camp.join(demog, demog("MAIL_CUST_ID")===camp("MTCH_ACC"), "left")
+var x = cam.filter("MATCH_ACCOUNT is not null")
+x= x.drop("MTCH_ACC")
+
+x.write.mode("overwrite").parquet("/campaign/inputfile_data")
+var filter_data = x.filter("MATCH_ACCOUNT is not null")
+filter_data.write.parquet("/campaign/tmp")
+// now campaign data is ready
+
+
+=============intermediate code======
+var ea = spark.read.parquet("/OctopusLayout/event_attributes_file/*")
+var attr = spark.read.parquet("/OctopusLayout/attributes/*")
+var res = attr.join(ea, ea("attr_id")=== attr("attr_id"),"inner").drop(attr("attr_id"))
+
+

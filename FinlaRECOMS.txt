@@ -1,0 +1,27 @@
+
+
+("recommendation_id","event_l1_name","prediction","rank","CURRENCY_DERIVATIVES","EQUITY","EQUITY_DERIVATIVES","FD_BONDS",
+"GENERAL_INSURANCE","IPO","LIFE_INSURANCE","MF","NPS","PLANS",,"MAIL_CUST_ID","SEGMENT","PRODUCT")
+"MATCH_ACCOUNT"
+
+"TMD_RECO_DATE", "TMD_MATCH_ID","TMD_MAIL_CUST_ID","TMD_SEGMENT","TMD_PRODUCT","TMD_RECO_DATE","TMD_CAMPAIGN_NAME","TMD_RANK"
+
+
+
+
+1. PATH1 >>   
+	 >>   Local : "file:///opt/platform/marketing/client_fnl_file.csv"
+
+              ## Client Final Recomndstins Data which in raw format(only rank,even_l1,userId)
+          
+2. PATH2 >>  hdfs : /icici/Fnl_testData_clinet
+
+           ##TEST_WINDOW_9mOTHS dATA  >> per each user_ Segment wise Bit Flips (FOR 9 products)
+
+3. PATH3 >>  hdfs :: /icici/Recoms_08AUG2019/*  
+            local_copy :: /opt/platform/Recs_for_3loq_AnlaysisRecoms_08Aug2019.csv   
+      
+            ## Join of Both path1 and path2  (Consists of rank,even_l1,userId  ++  Segment_wise BitFlips FOR 9 products)
+
+4. PATH4 >>
+

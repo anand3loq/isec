@@ -1,0 +1,157 @@
+#### Code to find discripencies in recommendations ####
+
+var gdata = spark.read.parquet("/persist/habitualExploree/R1P_19Oct19/genData/*")
+
+gdata.count()
+
+var gen_pre =  gdata.filter("txn_ts >= 1541050215000L").filter("txn_ts < 1565933415000L")
+//test-Period 1 nov 1541050215000 to 16 Aug 1565933415000
+
+gen_pre.count()
+
+val analysisPre=gdata.filter(col("txn_ts") >= 1563148800000L and col("txn_ts") < 1565933415000L)
+
+val analysisPost=gdata.filter(col("txn_ts") >= 1568246400000L and col("txn_ts") < 1571097600000L)
+
+
+analysisPre.count()
+
+analysisPost.count()
+
+
+
+var trim = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Aftr_Trming.csv")
+
+
+trim.count()
+
+
+trim.printSchema
+
+
+
+var control= spark.read.format("csv").option("header", "true").option("inferSchema", "true").load("file:///opt/platform/Base_Conf.csv")
+
+
+control.printSchema()
+
+
+control.count()
+
+var s = trim.except(control)
+
+
+s= s.withColumnRenamed("recommendation_id","event_id_l1")
+
+
+s.printSchema()
+
+
+
+// to find all transaction that should not have happened for recom base(s) and control base (control)
+
+
+
+
+//Pre Period overall M6
+
+var res1 = gen_pre.join(s, s("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== s("event_id_l1"),"inner").select(gen_pre.col("user_id")).distinct()
+
+
+res1.count()
+
+
+
+val excludedCampaignDFO=s.join(res1,Seq("user_id"),"left_anti")
+
+
+excludedCampaignDFO.write.mode("overwrite").parquet("/tmp/campaignDFsanitisedM7")
+
+
+
+
+
+//check groupA size 
+
+
+val groupATxnDFO=analysisPost.join(excludedCampaignDFO,analysisPost.col("user_id")===excludedCampaignDFO.col("user_id") && analysisPost.col("event_id")===excludedCampaignDFO.col("event_id_l1")).drop(analysisPost("user_id"))
+
+
+
+
+//size of groupA in Analysis Period
+
+
+groupATxnDFO.select("user_id").distinct().count()
+
+// 4615
+groupATxnDFO.select("user_id").distinct().count()//216
+
+groupATxnDFO.count()//192348
+groupATxnDFO.count()//4343
+groupATxnDFO.groupBy("event_id_l1").agg(sum(lit(1)).as("txn_count"),countDistinct("user_id")).show(false)
+
+
+
+
+
+
+//prePeriod analysis M1
+
+
+
+val excludeCamp = analysisPre.join(s,s.col("user_id")===analysisPre.col("user_id") && analysisPre.col("event_id")=== s.col("event_id_l1"),"inner").select(analysisPre.col("user_id")).distinct()
+
+
+excludeCamp.count()
+
+
+//
+excludeCamp.count()//405
+
+val excludedCampaignDF=s.join(excludeCamp,Seq("user_id"),"left_anti")
+
+
+
+excludedCampaignDF.count()// 216469
+
+excludedCampaignDF.count()//9595
+//write for prepost
+
+
+excludedCampaignDF.write.parquet("/tmp/campaignDFsanitisedM3")
+
+
+
+//check groupA size
+
+
+val groupATxnDF=analysisPost.join(excludedCampaignDF,analysisPost.col("user_id")===excludedCampaignDF.col("user_id") && analysisPost.col("event_id")===excludedCampaignDF.col("event_id_l1")).drop(analysisPost.col("user_id"))
+
+
+
+
+//size of groupA in Analysis Period
+
+
+groupATxnDF.select("user_id").distinct().count()
+
+
+
+groupATxnDF.count()
+
+groupATxnDF.groupBy("event_id_l1").agg(sum(lit(1)).as("txn_count"),countDistinct("user_id")).show(false)
+
+
+
+
+
+
+
+var res2 = gen_pre.join(control, control("user_id")=== gen_pre("user_id") && gen_pre("event_id")=== control("event_id_l1"),"inner").drop(control("event_id_l1")).drop(control("user_id"))
+
+
+
+res1.count
+res1.select("user_id").distinct.count 
+res2.select("user_id").distinct.count 
